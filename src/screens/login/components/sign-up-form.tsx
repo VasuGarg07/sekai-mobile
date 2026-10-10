@@ -5,7 +5,7 @@ import { PasswordField } from "@/components/password-field";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { TextField } from "@/components/ui/text-field";
-import { useAuthAction } from "@/hooks/use-auth-action";
+import { useAction } from "@/hooks/use-action";
 import { useAuth } from "@/providers/auth-provider";
 import { signUpWithEmail } from "@/services/auth";
 import { spacing } from "@/theme";
@@ -23,7 +23,7 @@ export function SignUpForm({ email, onEmailChange, onSignedUp }: SignUpFormProps
   const { refreshUser } = useAuth();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const { run, pending, error } = useAuthAction();
+  const { run, pending, error } = useAction();
 
   const canSubmit = name.trim() !== "" && email.trim() !== "" && isStrongPassword(password);
 

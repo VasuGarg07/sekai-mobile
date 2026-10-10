@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
 
-import type { AuthResult } from "@/services/auth";
+import type { ActionResult } from "@/types/result";
 
-export function useAuthAction() {
+export function useAction() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const run = useCallback(async (action: () => Promise<AuthResult>) => {
+  const run = useCallback(async (action: () => Promise<ActionResult>) => {
     setPending(true);
     setError(null);
     const result = await action();

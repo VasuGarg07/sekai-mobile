@@ -20,11 +20,10 @@ import googleServices from "../../google-services.json";
 import { WEB_APP_URL } from "@/constants";
 import { fireAuth } from "@/lib/firebase";
 import { registerProfile } from "@/services/profile";
+import type { ActionResult } from "@/types/result";
 
-export type AuthResult = { success: true } | { success: false; message: string | null };
-
-const CANCELLED: AuthResult = { success: false, message: null };
-const OK: AuthResult = { success: true };
+const CANCELLED: ActionResult = { success: false, message: null };
+const OK: ActionResult = { success: true };
 
 // Google only returns an ID token Firebase accepts when configured with the web OAuth client (type 3).
 GoogleSignin.configure({
@@ -54,12 +53,12 @@ function getErrorCode(error: unknown): string | undefined {
   return undefined;
 }
 
-function toFailure(error: unknown, fallback: string): AuthResult {
+function toFailure(error: unknown, fallback: string): ActionResult {
   const code = getErrorCode(error);
   return { success: false, message: (code && ERROR_MESSAGES[code]) || fallback };
 }
 
-export async function signInWithGoogle(): Promise<AuthResult> {
+export async function signInWithGoogle(): Promise<ActionResult> {
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const response = await GoogleSignin.signIn();
@@ -86,7 +85,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   }
 }
 
-export async function signInWithEmail(email: string, password: string): Promise<AuthResult> {
+export async function signInWithEmail(email: string, password: string): Promise<ActionResult> {
   try {
     await signInWithEmailAndPassword(fireAuth, email.trim(), password);
     return OK;
@@ -99,7 +98,7 @@ export async function signUpWithEmail(
   name: string,
   email: string,
   password: string,
-): Promise<AuthResult> {
+): Promise<ActionResult> {
   let user: User;
   try {
     ({ user } = await createUserWithEmailAndPassword(fireAuth, email.trim(), password));
@@ -107,9 +106,6 @@ export async function signUpWithEmail(
     return toFailure(error, "Couldn't create your account. Please try again.");
   }
 
-  // The account exists from here on, so a failed name or profile write must not fail the sign-up.
-  // The name is set before the verification email is sent because the email greets the user by it,
-  // and the profile is re-registered because the auth listener may have written it without the name.
   try {
     await updateProfile(user, { displayName: name.trim() });
     await registerProfile(user);
@@ -121,7 +117,7 @@ export async function signUpWithEmail(
   return OK;
 }
 
-async function sendVerification(user: User): Promise<AuthResult> {
+async function sendVerification(user: User): Promise<ActionResult> {
   try {
     await sendEmailVerification(user, { url: WEB_APP_URL });
     return OK;
@@ -130,14 +126,14 @@ async function sendVerification(user: User): Promise<AuthResult> {
   }
 }
 
-export async function resendVerification(): Promise<AuthResult> {
+export async function resendVerification(): Promise<ActionResult> {
   const user = fireAuth.currentUser;
   if (!user) return { success: false, message: "Sign in to verify your email." };
   return sendVerification(user);
 }
 
 /** Reports success for unknown emails too, so the form can't reveal who has an account. */
-export async function sendPasswordReset(email: string): Promise<AuthResult> {
+export async function sendPasswordReset(email: string): Promise<ActionResult> {
   try {
     await sendPasswordResetEmail(fireAuth, email.trim(), { url: WEB_APP_URL });
     return OK;

@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { TextLink } from "@/components/ui/text-link";
-import { useAuthAction } from "@/hooks/use-auth-action";
+import { useAction } from "@/hooks/use-action";
 import { useAuth } from "@/providers/auth-provider";
 import { signInWithGoogle } from "@/services/auth";
 import { colors, fontSize, fontWeight, spacing } from "@/theme";
@@ -29,7 +29,7 @@ export function LoginScreen() {
   const [signedInOnOpen] = useState(user !== null);
   const [mode, setMode] = useState<LoginMode>("signin");
   const [email, setEmail] = useState("");
-  const google = useAuthAction();
+  const google = useAction();
 
   if (signedInOnOpen) return <Redirect href="/" />;
 

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
-import { useAuthAction } from "@/hooks/use-auth-action";
+import { useAction } from "@/hooks/use-action";
 import { sendPasswordReset } from "@/services/auth";
 import { colors, fontSize, lineHeight, spacing } from "@/theme";
 
@@ -16,7 +16,7 @@ interface ResetPasswordFormProps {
 
 export function ResetPasswordForm({ email, onEmailChange }: ResetPasswordFormProps) {
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const { run, pending, error } = useAuthAction();
+  const { run, pending, error } = useAction();
 
   const canSubmit = email.trim() !== "";
 
