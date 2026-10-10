@@ -1,4 +1,3 @@
-import { DMSerifDisplay_400Regular, useFonts } from "@expo-google-fonts/dm-serif-display";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -27,12 +26,9 @@ export default function RootLayout() {
 
 function AppNavigator() {
   const theme = useTheme();
-  const [fontsLoaded, fontError] = useFonts({ DMSerifDisplay_400Regular });
-  const ready = fontsLoaded || fontError !== null;
-
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
-  }, [ready]);
+    SplashScreen.hideAsync();
+  }, []);
 
   const screenOptions = useMemo<StackOptions>(
     () => ({
@@ -53,8 +49,6 @@ function AppNavigator() {
     }),
     [theme],
   );
-
-  if (!ready) return null;
 
   return (
     <>

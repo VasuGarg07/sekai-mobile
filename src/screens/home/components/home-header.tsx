@@ -10,7 +10,7 @@ import { GlassView } from "@/components/ui/glass";
 import { IconButton } from "@/components/ui/icon-button";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
-import { fonts, radius, spacing } from "@/theme";
+import { radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import { getDisplayName } from "@/utils/user";
 
@@ -107,8 +107,8 @@ const useStyles = createStyles(() => ({
     height: LOGO_SIZE,
   },
   wordmark: {
-    fontFamily: fonts.display,
     fontSize: 22,
     lineHeight: 28,
+    fontWeight: "800",
   },
 }));

@@ -47,7 +47,7 @@ export function TabButton({ label, icon, isFocused = false, onPress, ...props }:
 
   const pillStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ scaleX: 0.6 + progress.value * 0.4 }],
+    transform: [{ scale: 0.6 + progress.value * 0.4 }],
   }));
 
   const handlePress = (event: GestureResponderEvent) => {
@@ -60,8 +60,8 @@ export function TabButton({ label, icon, isFocused = false, onPress, ...props }:
       accessibilityRole="tab"
       accessibilityLabel={label}
       accessibilityState={{ selected: isFocused }}
-      style={styles.tab}
       {...props}
+      style={styles.tab}
       onPress={handlePress}
     >
       <View style={styles.iconWrap}>
@@ -90,13 +90,14 @@ const useStyles = createStyles(({ colors }) => ({
   },
   tab: {
     flex: 1,
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.xxs,
   },
   iconWrap: {
-    width: 56,
-    height: 30,
+    width: 36,
+    height: 36,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
-import { fonts, POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
+import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
 import { getTitle } from "@/utils/anime";
@@ -51,8 +51,8 @@ const useStyles = createStyles(({ colors }) => ({
     alignItems: "flex-end",
   },
   rank: {
-    fontFamily: fonts.display,
     fontSize: 96,
+    fontWeight: "800",
     lineHeight: 96,
     marginRight: -spacing.lg,
     color: colors.surfaceRaised,

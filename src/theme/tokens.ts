@@ -20,10 +20,6 @@ export const radius = {
   full: 999,
 } as const;
 
-export const fonts = {
-  display: "DMSerifDisplay_400Regular",
-} as const;
-
 export type TextVariant =
   | "display"
   | "title"
@@ -36,7 +32,7 @@ export type TextVariant =
   | "overline";
 
 export const typography: Record<TextVariant, TextStyle> = {
-  display: { fontFamily: fonts.display, fontSize: 34, lineHeight: 40 },
+  display: { fontSize: 34, lineHeight: 40, fontWeight: "800" },
   title: { fontSize: 26, lineHeight: 32, fontWeight: "700" },
   headline: { fontSize: 20, lineHeight: 26, fontWeight: "700" },
   subtitle: { fontSize: 17, lineHeight: 22, fontWeight: "600" },
