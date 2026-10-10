@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "sekai",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
     },
@@ -47,7 +47,6 @@
         "projectId": "7137cd66-b3dc-4cb9-860d-67da4ad95f93"
       }
     },
-    "owner": "vasu-garg-labs",
-    "backgroundColor": "#0E0E11"
+    "owner": "vasu-garg-labs"
   }
 }
