@@ -20,7 +20,7 @@ function decodeEntities(text: string): string {
 
     const codePoint =
       code[1].toLowerCase() === "x" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
-    return Number.isNaN(codePoint) ? entity : String.fromCodePoint(codePoint);
+    return Number.isNaN(codePoint) || codePoint > 0x10ffff ? entity : String.fromCodePoint(codePoint);
   });
 }
 
