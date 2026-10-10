@@ -6,7 +6,9 @@ import {
 } from "@react-native-google-signin/google-signin";
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   GoogleAuthProvider,
+  linkWithCredential,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithCredential,
@@ -44,6 +46,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   "auth/password-does-not-meet-requirements": "That password doesn't meet the requirements.",
   "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
   "auth/user-disabled": "This account has been disabled.",
+  "auth/requires-recent-login": "For security, sign out and sign in again, then try once more.",
+  "auth/provider-already-linked": "Your account already has a password.",
+  "auth/credential-already-in-use": "This email is already used by another account.",
 };
 
 function getErrorCode(error: unknown): string | undefined {
@@ -140,6 +145,21 @@ export async function sendPasswordReset(email: string): Promise<ActionResult> {
   } catch (error) {
     if (getErrorCode(error) === "auth/user-not-found") return OK;
     return toFailure(error, "Couldn't send the reset email. Please try again.");
+  }
+}
+
+/** Adds email + password sign-in to the current Google or GitHub account. */
+export async function setPassword(password: string): Promise<ActionResult> {
+  const user = fireAuth.currentUser;
+  if (!user?.email) {
+    return { success: false, message: "Your account has no email address to sign in with." };
+  }
+
+  try {
+    await linkWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    return OK;
+  } catch (error) {
+    return toFailure(error, "Couldn't set your password. Please try again.");
   }
 }
 

@@ -16,4 +16,8 @@ export const queryKeys = {
   watchlist: (uid: string | undefined) => ["watchlist", uid] as const,
   watchlistItems: (uid: string | undefined) => ["watchlist", uid, "items"] as const,
   watchlistIds: (uid: string | undefined) => ["watchlist", uid, "ids"] as const,
+  appUpdate: () => ["app-update"] as const,
+  reminder: (animeId: number) => ["reminder", animeId] as const,
+  watchStatus: (uid: string | undefined, animeId: number) =>
+    ["watchlist", uid, "status", animeId] as const,
 };

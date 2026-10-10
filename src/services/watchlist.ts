@@ -12,6 +12,7 @@ import {
   startAfter,
   updateDoc,
   writeBatch,
+  type DocumentSnapshot,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 
@@ -59,7 +60,7 @@ export interface WatchlistPage {
 
 const PAGE_SIZE = 24;
 
-const readEntry = (snapshot: QueryDocumentSnapshot) => snapshot.data() as StoredEntry;
+const readEntry = (snapshot: DocumentSnapshot) => snapshot.data() as StoredEntry;
 
 const entriesRef = (uid: string) => collection(fireStore, "users", uid, "watchlist");
 const entryRef = (uid: string, animeId: number) =>
@@ -96,6 +97,12 @@ export async function fetchWatchlistIds(uid: string): Promise<Set<number>> {
   const snapshot = await getDoc(idsRef(uid));
   const ids: number[] = snapshot.exists() ? (snapshot.data().ids ?? []) : [];
   return new Set(ids);
+}
+
+/** The saved status, or null when the anime isn't in the watchlist. */
+export async function fetchWatchStatus(uid: string, animeId: number): Promise<WatchStatus | null> {
+  const snapshot = await getDoc(entryRef(uid, animeId));
+  return snapshot.exists() ? readEntry(snapshot).watchStatus : null;
 }
 
 export async function addToWatchlist(

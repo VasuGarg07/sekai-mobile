@@ -116,6 +116,18 @@ const BY_IDS_QUERY = /* GraphQL */ `
   }
 `;
 
+const NEXT_EPISODES_QUERY = /* GraphQL */ `
+  query ($ids: [Int], $perPage: Int) {
+    Page(page: 1, perPage: $perPage) {
+      media(type: ANIME, id_in: $ids) {
+        id
+        title { english romaji }
+        nextAiringEpisode { episode airingAt }
+      }
+    }
+  }
+`;
+
 const GENRES_QUERY = /* GraphQL */ `
   query {
     GenreCollection
@@ -243,6 +255,40 @@ export async function fetchAnimeByIds(ids: number[]): Promise<Map<number, AnimeL
   }
 
   return result;
+}
+
+export interface NextEpisode {
+  animeId: number;
+  title: string;
+  episode: number;
+  airingAt: Date;
+}
+
+/** Upcoming episodes for the given anime; finished or unscheduled anime are left out. */
+export async function fetchNextEpisodes(ids: number[]): Promise<NextEpisode[]> {
+  const episodes: NextEpisode[] = [];
+
+  for (let start = 0; start < ids.length; start += BATCH_SIZE) {
+    if (start > 0) await wait(BATCH_DELAY_MS);
+    const data = await queryAniList<MediaPageResponse>(NEXT_EPISODES_QUERY, {
+      ids: ids.slice(start, start + BATCH_SIZE),
+      perPage: BATCH_SIZE,
+    });
+
+    for (const media of data.Page.media) {
+      const next = media.nextAiringEpisode;
+      if (!next) continue;
+      episodes.push({
+        animeId: media.id,
+        title: media.title?.english ?? media.title?.romaji ?? "An anime you follow",
+        episode: next.episode,
+        // AniList sends seconds since epoch.
+        airingAt: new Date(next.airingAt * 1000),
+      });
+    }
+  }
+
+  return episodes;
 }
 
 // Empty strings and arrays are dropped so equivalent searches send identical variables.

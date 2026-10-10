@@ -1,80 +1,59 @@
-import { router } from "expo-router";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/providers/auth-provider";
-import { signOut } from "@/services/auth";
-import { colors, fontSize, fontWeight, spacing } from "@/theme";
-import type { SekaiUser } from "@/types/user";
-import { getDisplayName, getSignInMethodsLabel, hasPassword } from "@/utils/user";
+import { UpdateBanner } from "@/components/update-banner";
+import type { RankedListKind } from "@/constants";
+import { useRefresh } from "@/hooks/use-refresh";
+import { colors, spacing } from "@/theme";
 
-import { VerifyEmailNote } from "./components/verify-email-note";
+import { RankedShelf } from "./components/ranked-shelf";
+import { SpotlightCarousel } from "./components/spotlight-carousel";
 
-// Placeholder until the real screens (Phase 6).
+const SHELVES: RankedListKind[] = ["top-airing", "popular", "recents", "favourite", "completed"];
+
 export function HomeScreen() {
-  const { user, initialized } = useAuth();
+  const queryClient = useQueryClient();
+  const refetchAnime = useCallback(
+    () => queryClient.refetchQueries({ queryKey: ["anime"], type: "active" }),
+    [queryClient],
+  );
+  const { refreshing, onRefresh } = useRefresh(refetchAnime);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Sekai</Text>
-        {!initialized && <ActivityIndicator color={colors.textMuted} />}
-        {initialized && user && <SignedIn user={user} />}
-        {initialized && !user && <SignedOut />}
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[colors.accent]}
+          progressBackgroundColor={colors.surfaceRaised}
+        />
+      }
+    >
+      <SpotlightCarousel />
+      <View style={styles.banner}>
+        <UpdateBanner />
       </View>
-    </SafeAreaView>
-  );
-}
-
-interface SignedInProps {
-  user: SekaiUser;
-}
-
-function SignedIn({ user }: SignedInProps) {
-  return (
-    <>
-      <Text style={styles.subtitle}>Signed in as {getDisplayName(user)}</Text>
-      <Text style={styles.muted}>{user.email}</Text>
-      <Text style={styles.muted}>{getSignInMethodsLabel(user)}</Text>
-      {hasPassword(user) && !user.emailVerified && <VerifyEmailNote />}
-      <Button title="Sign out" variant="secondary" onPress={signOut} />
-    </>
-  );
-}
-
-function SignedOut() {
-  return (
-    <>
-      <Text style={styles.subtitle}>Not signed in.</Text>
-      <Button title="Sign in" onPress={() => router.push("/login")} />
-    </>
+      {SHELVES.map((kind) => (
+        <RankedShelf key={kind} kind={kind} />
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  screen: {
     flex: 1,
     backgroundColor: colors.background,
   },
   content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.md,
-    padding: spacing.xl,
+    gap: spacing.xl,
+    paddingBottom: spacing.xxl,
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-  },
-  subtitle: {
-    color: colors.text,
-    fontSize: fontSize.lg,
-  },
-  muted: {
-    color: colors.textMuted,
-    fontSize: fontSize.md,
+  banner: {
+    paddingHorizontal: spacing.lg,
   },
 });

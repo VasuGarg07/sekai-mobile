@@ -14,6 +14,7 @@ import {
   addToWatchlist,
   fetchWatchlistIds,
   fetchWatchlistPage,
+  fetchWatchStatus,
   removeFromWatchlist,
   updateWatchStatus,
   type WatchlistCursor,
@@ -55,6 +56,16 @@ export function useWatchlistIds(): Set<number> {
     staleTime: 10 * 60 * 1000,
   });
   return data ?? EMPTY_IDS;
+}
+
+/** null when the anime isn't saved; undefined while loading or signed out. */
+export function useWatchStatus(animeId: number): WatchStatus | null | undefined {
+  const { user } = useAuth();
+  const { data } = useQuery({
+    queryKey: queryKeys.watchStatus(user?.uid, animeId),
+    queryFn: user ? () => fetchWatchStatus(user.uid, animeId) : skipToken,
+  });
+  return data;
 }
 
 function useWatchlistMutation<TVariables>(
