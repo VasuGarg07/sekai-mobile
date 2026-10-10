@@ -45,7 +45,9 @@ export function useUpdatePreferences() {
       return { previous };
     },
     onSuccess: (result, _updates, context) => {
-      if (!result.success) queryClient.setQueryData(queryKey, context?.previous);
+      if (result.success) return;
+      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      else void queryClient.invalidateQueries({ queryKey });
     },
   });
 }
