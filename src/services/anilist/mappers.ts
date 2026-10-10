@@ -62,7 +62,7 @@ export function toAnimeDetail(media: AniListMedia): AnimeDetail {
     tags: media.tags ?? [],
     popularity: media.popularity ?? null,
     favourites: media.favourites ?? null,
-    relations: (media.relations?.edges ?? []).map(toAnimeRelation),
+    relations: (media.relations?.edges ?? []).filter((edge) => edge.node).map(toAnimeRelation),
     recommendations,
     trailer: media.trailer ?? null,
     nextEpisode: media.nextAiringEpisode
