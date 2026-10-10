@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { Redirect, router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppText } from "@/components/ui/app-text";
@@ -52,7 +52,8 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      {/* Edge-to-edge Android no longer resizes the window for the keyboard, so pad here too. */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.topRow}>
             <Image source={dark ? logoForDark : logoForLight} style={styles.logo} contentFit="contain" />

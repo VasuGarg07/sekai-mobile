@@ -1,4 +1,4 @@
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ interface MessageStateProps {
   actionTitle?: string;
   actionIcon?: IconName;
   onAction?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function MessageState({
@@ -23,12 +24,13 @@ export function MessageState({
   actionTitle,
   actionIcon,
   onAction,
+  style,
 }: MessageStateProps) {
   const { colors } = useTheme();
   const styles = useStyles();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {icon && (
         <View style={styles.iconCircle}>
           <Icon name={icon} size={32} color={colors.accentText} />
@@ -45,7 +47,10 @@ export function MessageState({
         </AppText>
       )}
       {actionTitle && onAction && (
-        <Button title={actionTitle} icon={actionIcon} variant="tonal" onPress={onAction} />
+        // Button aligns itself to the start, so it needs a centred wrapper.
+        <View style={styles.action}>
+          <Button title={actionTitle} icon={actionIcon} variant="tonal" onPress={onAction} />
+        </View>
       )}
     </View>
   );
@@ -54,9 +59,10 @@ export function MessageState({
 interface ErrorStateProps {
   message?: string;
   onRetry?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function ErrorState({ message, onRetry }: ErrorStateProps) {
+export function ErrorState({ message, onRetry, style }: ErrorStateProps) {
   return (
     <MessageState
       icon="cloud_off"
@@ -65,6 +71,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       actionTitle={onRetry ? "Try again" : undefined}
       actionIcon="refresh"
       onAction={onRetry}
+      style={style}
     />
   );
 }
@@ -86,6 +93,9 @@ const useStyles = createStyles(({ colors }) => ({
     justifyContent: "center",
     gap: spacing.md,
     padding: spacing.xxl,
+  },
+  action: {
+    alignSelf: "center",
   },
   iconCircle: {
     width: 72,

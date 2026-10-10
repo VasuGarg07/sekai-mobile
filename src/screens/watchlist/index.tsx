@@ -25,6 +25,7 @@ type ViewMode = "list" | "grid";
 
 export function WatchlistScreen() {
   const styles = useStyles();
+  const bottomSpace = useTabBarSpace();
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
@@ -44,6 +45,7 @@ export function WatchlistScreen() {
         <WatchlistContent viewMode={viewMode} />
       ) : (
         <MessageState
+          style={{ paddingBottom: bottomSpace }}
           icon="bookmarks"
           title="Your list lives here"
           message="Sign in to save anime and pick up where you left off, here or on the web."
@@ -116,9 +118,34 @@ function WatchlistContent({ viewMode }: WatchlistContentProps) {
       </>
     );
   }
-  if (isError) return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (isError) {
+    return <ErrorState style={{ paddingBottom: bottomSpace }} message={error.message} onRetry={() => refetch()} />;
+  }
 
   const isGrid = viewMode === "grid";
+  const refreshControl = (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      colors={[colors.accent]}
+      progressBackgroundColor={colors.surfaceRaised}
+    />
+  );
+
+  // Outside the FlashList so the message can fill and centre in the space below the filters.
+  if (visibleItems.length === 0) {
+    return (
+      <>
+        {filters}
+        <ScrollView
+          refreshControl={refreshControl}
+          contentContainerStyle={{ ...styles.emptyContent, paddingBottom: bottomSpace }}
+        >
+          <EmptyList filtered={filter !== null} />
+        </ScrollView>
+      </>
+    );
+  }
 
   return (
     <>
@@ -136,15 +163,7 @@ function WatchlistContent({ viewMode }: WatchlistContentProps) {
         renderItem={({ item }) => (isGrid ? <WatchlistGridCard item={item} /> : <WatchlistRow item={item} />)}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.accent]}
-            progressBackgroundColor={colors.surfaceRaised}
-          />
-        }
-        ListEmptyComponent={<EmptyList filtered={filter !== null} />}
+        refreshControl={refreshControl}
         ListFooterComponent={
           isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null
         }
@@ -193,6 +212,9 @@ const useStyles = createStyles(({ colors }) => ({
   notice: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
+  },
+  emptyContent: {
+    flexGrow: 1,
   },
   gridContent: {
     paddingHorizontal: spacing.md,

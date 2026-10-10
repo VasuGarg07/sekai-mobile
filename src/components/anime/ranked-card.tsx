@@ -8,8 +8,9 @@ import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
 import { getTitle } from "@/utils/anime";
 
-export const RANKED_CARD_WIDTH = 168;
 const COVER_WIDTH = 112;
+const RANK_SLOT_WIDTH = 56;
+export const RANKED_CARD_WIDTH = RANK_SLOT_WIDTH + COVER_WIDTH;
 
 interface RankedCardProps {
   anime: AnimeListItem;
@@ -47,14 +48,17 @@ const useStyles = createStyles(({ colors }) => ({
     opacity: 0.75,
   },
   artwork: {
-    flexDirection: "row",
-    alignItems: "flex-end",
+    marginLeft: RANK_SLOT_WIDTH,
   },
+  // Absolutely placed so a wide rank like "10" overlaps the cover instead of widening the card.
   rank: {
-    fontSize: 96,
+    position: "absolute",
+    left: -RANK_SLOT_WIDTH,
+    bottom: 0,
+    fontSize: 80,
     fontWeight: "800",
-    lineHeight: 96,
-    marginRight: -spacing.lg,
+    lineHeight: 88,
+    includeFontPadding: false,
     color: colors.surfaceRaised,
     textShadowColor: colors.accent,
     textShadowRadius: 6,
@@ -67,6 +71,6 @@ const useStyles = createStyles(({ colors }) => ({
     backgroundColor: colors.skeleton,
   },
   title: {
-    marginLeft: RANKED_CARD_WIDTH - COVER_WIDTH,
+    marginLeft: RANK_SLOT_WIDTH,
   },
 }));
