@@ -10,7 +10,6 @@ import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { currentVersion } from "@/services/app-update";
-import { signOut } from "@/services/auth";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { SekaiUser } from "@/types/user";
@@ -21,7 +20,7 @@ import { getSignInMethodsLabel, hasPassword } from "@/utils/user";
 import { AppearanceCard } from "./components/appearance-card";
 import { ProfileCard } from "./components/profile-card";
 
-type SettingsSheet = "default-status" | "export" | "set-password" | "verify-email";
+type SettingsSheet = "default-status" | "export" | "set-password" | "sign-out" | "verify-email";
 
 export function ProfileScreen() {
   const { tints } = useTheme();
@@ -71,14 +70,6 @@ function SignedInSettings({ user }: SignedInSettingsProps) {
     confirmTap();
     const result = await updatePreferences.mutateAsync({ adultMode });
     if (!result.success && result.message) showMessage(result.message);
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch {
-      showMessage("Couldn't sign out. Please try again.");
-    }
   };
 
   const openSheet = (sheet: SettingsSheet) =>
@@ -141,7 +132,7 @@ function SignedInSettings({ user }: SignedInSettingsProps) {
             onPress={() => openSheet("verify-email")}
           />
         )}
-        <ListItem icon="logout" title="Sign out" destructive onPress={handleSignOut} />
+        <ListItem icon="logout" title="Sign out" destructive onPress={() => openSheet("sign-out")} />
       </ListGroup>
     </>
   );
