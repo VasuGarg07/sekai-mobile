@@ -201,6 +201,7 @@ function toWatchlistItem(entry: StoredEntry, fresh?: AnimeListItem): WatchlistIt
     titleEnglish,
     titleRomaji,
     coverImage: entry.image ?? null,
+    bannerImage: null,
     format: entry.format ?? entry.type ?? null,
     episodeDuration: entry.duration ?? null,
     averageScore: entry.score ?? null,

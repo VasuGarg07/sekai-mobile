@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { StyleSheet, Text, View, type TextInputProps } from "react-native";
+import { View, type TextInputProps } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
+import { Icon } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { TextField } from "@/components/ui/text-field";
-import { TextLink } from "@/components/ui/text-link";
-import { colors, fontSize, spacing } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import { PASSWORD_RULES } from "@/utils/password-rules";
 
 interface PasswordFieldProps extends Omit<TextInputProps, "secureTextEntry"> {
   value: string;
   label?: string;
-  /** Lists the password requirements and ticks them off while typing. */
   showRules?: boolean;
 }
 
@@ -19,24 +22,23 @@ export function PasswordField({
   showRules = false,
   ...inputProps
 }: PasswordFieldProps) {
+  const styles = useStyles();
   const [visible, setVisible] = useState(false);
-
-  const handleToggleVisible = () => setVisible((current) => !current);
 
   return (
     <View style={styles.container}>
       <TextField
         label={label}
+        icon="lock"
         value={value}
         secureTextEntry={!visible}
         autoCapitalize="none"
         autoCorrect={false}
         accessory={
-          <TextLink
-            title={visible ? "Hide" : "Show"}
+          <IconButton
+            icon={visible ? "visibility_off" : "visibility"}
             accessibilityLabel={visible ? "Hide password" : "Show password"}
-            onPress={handleToggleVisible}
-            style={styles.toggle}
+            onPress={() => setVisible((current) => !current)}
           />
         }
         {...inputProps}
@@ -51,35 +53,40 @@ interface PasswordRulesProps {
 }
 
 function PasswordRules({ password }: PasswordRulesProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   return (
     <View style={styles.rules}>
       {PASSWORD_RULES.map((rule) => {
         const met = rule.test(password);
         return (
-          <Text key={rule.label} style={[styles.rule, met && styles.ruleMet]}>
-            {met ? "✓" : "•"} {rule.label}
-          </Text>
+          <View key={rule.label} style={styles.rule}>
+            <Icon
+              name={met ? "check_circle" : "radio_button_unchecked"}
+              size={iconSize.sm}
+              color={met ? colors.success : colors.textSubtle}
+            />
+            <AppText variant="caption" tone={met ? "default" : "muted"}>
+              {rule.label}
+            </AppText>
+          </View>
         );
       })}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   container: {
     gap: spacing.sm,
   },
-  toggle: {
-    paddingHorizontal: spacing.md,
-  },
   rules: {
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
   rule: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
-  ruleMet: {
-    color: colors.success,
-  },
-});
+}));

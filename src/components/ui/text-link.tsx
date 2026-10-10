@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, type PressableProps } from "react-native";
+import { Pressable, type PressableProps } from "react-native";
 
-import { colors, fontSize, fontWeight } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
 
 interface TextLinkProps extends Omit<PressableProps, "children"> {
   title: string;
@@ -10,19 +10,9 @@ interface TextLinkProps extends Omit<PressableProps, "children"> {
 export function TextLink({ title, tone = "accent", ...pressableProps }: TextLinkProps) {
   return (
     <Pressable accessibilityRole="button" hitSlop={8} {...pressableProps}>
-      <Text style={[styles.text, tone === "muted" && styles.muted]}>{title}</Text>
+      <AppText variant="label" tone={tone}>
+        {title}
+      </AppText>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  text: {
-    color: colors.accent,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
-  },
-  muted: {
-    color: colors.textMuted,
-    fontWeight: fontWeight.medium,
-  },
-});

@@ -1,31 +1,46 @@
-import { Pressable, StyleSheet, Text, type PressableProps } from "react-native";
+import { Pressable, View, type PressableProps } from "react-native";
 
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 interface ChipProps extends Omit<PressableProps, "children" | "style"> {
   label: string;
+  icon?: IconName;
+  /** Small colored dot before the label, e.g. a watch status color. */
+  dotColor?: string;
   selected?: boolean;
 }
 
-export function Chip({ label, selected = false, ...pressableProps }: ChipProps) {
+export function Chip({ label, icon, dotColor, selected = false, ...pressableProps }: ChipProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      style={({ pressed }) => [
-        styles.chip,
-        selected && styles.selected,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.chip, selected && styles.selected, pressed && styles.pressed]}
       {...pressableProps}
     >
-      <Text style={[styles.label, selected && styles.selectedLabel]}>{label}</Text>
+      {dotColor && <View style={[styles.dot, { backgroundColor: dotColor }]} />}
+      {icon && (
+        <Icon name={icon} size={iconSize.sm} color={selected ? colors.accentText : colors.textMuted} />
+      )}
+      <AppText variant="label" tone={selected ? "accent" : "muted"}>
+        {label}
+      </AppText>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
@@ -35,17 +50,14 @@ const styles = StyleSheet.create({
   },
   selected: {
     borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
+    backgroundColor: colors.accentSoft,
   },
   pressed: {
     opacity: 0.7,
   },
-  label: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: radius.full,
   },
-  selectedLabel: {
-    color: colors.text,
-  },
-});
+}));

@@ -1,81 +1,126 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } from "react-native";
 
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { GlassView } from "@/components/ui/glass";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing, type ThemeColors } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
-type ButtonVariant = "primary" | "secondary" | "light";
+export type ButtonVariant = "filled" | "tonal" | "outline" | "ghost" | "glass" | "danger";
 type ButtonSize = "md" | "sm";
 
 interface ButtonProps extends Omit<PressableProps, "children" | "style"> {
   title: string;
+  icon?: IconName;
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  fullWidth?: boolean;
 }
+
+const CONTENT_COLORS: Record<ButtonVariant, keyof ThemeColors> = {
+  filled: "onAccent",
+  tonal: "accentText",
+  outline: "text",
+  ghost: "accentText",
+  glass: "text",
+  danger: "danger",
+};
 
 export function Button({
   title,
-  variant = "primary",
+  icon,
+  variant = "filled",
   size = "md",
   loading = false,
+  fullWidth = false,
   disabled,
   ...pressableProps
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isDisabled = disabled || loading;
+  const contentColor = colors[CONTENT_COLORS[variant]];
+
+  const content = (
+    <View style={styles.content}>
+      {loading ? (
+        <ActivityIndicator color={contentColor} />
+      ) : (
+        <>
+          {icon && <Icon name={icon} size={size === "sm" ? iconSize.sm : iconSize.md} color={contentColor} />}
+          <AppText variant={size === "sm" ? "label" : "bodyStrong"} style={{ color: contentColor }}>
+            {title}
+          </AppText>
+        </>
+      )}
+    </View>
+  );
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        sizeStyles[size],
-        variantStyles[variant],
+        size === "sm" ? styles.small : styles.medium,
+        fullWidth && styles.fullWidth,
+        variant !== "glass" && styles[variant],
         (pressed || isDisabled) && styles.dimmed,
       ]}
       {...pressableProps}
     >
-      {loading ? (
-        <ActivityIndicator color={labelStyles[variant].color} />
-      ) : (
-        <Text style={[styles.label, labelSizeStyles[size], labelStyles[variant]]}>{title}</Text>
-      )}
+      {variant === "glass" ? <GlassView style={styles.glass}>{content}</GlassView> : content}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   base: {
+    borderRadius: radius.full,
+    overflow: "hidden",
+    alignSelf: "flex-start",
+  },
+  medium: {
+    minHeight: 48,
+  },
+  small: {
+    minHeight: 36,
+  },
+  fullWidth: {
+    alignSelf: "stretch",
+  },
+  content: {
+    flexGrow: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: radius.md,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xl,
   },
-  label: {
-    fontWeight: fontWeight.semibold,
+  glass: {
+    flexGrow: 1,
+    flexDirection: "row",
+    borderRadius: radius.full,
+  },
+  filled: {
+    backgroundColor: colors.accent,
+  },
+  tonal: {
+    backgroundColor: colors.accentSoft,
+  },
+  outline: {
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderColor: colors.borderStrong,
+  },
+  ghost: {},
+  danger: {
+    backgroundColor: colors.dangerSoft,
   },
   dimmed: {
     opacity: 0.6,
   },
-});
-
-const sizeStyles = StyleSheet.create({
-  md: { minHeight: 48, paddingHorizontal: spacing.xl },
-  sm: { minHeight: 36, paddingHorizontal: spacing.md },
-});
-
-const labelSizeStyles = StyleSheet.create({
-  md: { fontSize: fontSize.base },
-  sm: { fontSize: fontSize.md },
-});
-
-const variantStyles = StyleSheet.create({
-  primary: { backgroundColor: colors.accent },
-  secondary: { borderWidth: 1, borderColor: colors.border },
-  light: { backgroundColor: colors.light },
-});
-
-const labelStyles = StyleSheet.create({
-  primary: { color: colors.onAccent },
-  secondary: { color: colors.text },
-  light: { color: colors.onLight },
-});
+}));

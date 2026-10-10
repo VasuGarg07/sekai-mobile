@@ -3,6 +3,7 @@ export const MEDIA_LIST_FIELDS = /* GraphQL */ `
   id
   title { english romaji }
   coverImage { large }
+  bannerImage
   format
   duration
   averageScore

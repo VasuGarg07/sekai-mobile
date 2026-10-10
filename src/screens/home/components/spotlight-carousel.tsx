@@ -1,57 +1,93 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
 
+import { QuickWatchlistButton } from "@/components/anime/quick-watchlist-button";
+import { AppText } from "@/components/ui/app-text";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSpotlight } from "@/hooks/use-anime";
-import { colors, fontSize, fonts, radius, spacing } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { radius, spacing, withAlpha } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { AnimeSpotlight } from "@/types/anime";
-import { getShortMeta, getTitle } from "@/utils/anime";
+import { formatEnum, formatScore, getTitle } from "@/utils/anime";
 
-const HEIGHT = 440;
+export const SPOTLIGHT_HEIGHT = 560;
+const AUTO_ADVANCE_MS = 6_000;
+const PARALLAX = 0.35;
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<AnimeSpotlight>);
 
 export function SpotlightCarousel() {
   const { width } = useWindowDimensions();
+  const styles = useStyles();
   const { data, isPending, isError } = useSpotlight();
+  const listRef = useRef<FlatList<AnimeSpotlight>>(null);
+  const scrollX = useSharedValue(0);
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const count = data?.length ?? 0;
 
-  if (isPending || isError) {
+  const onScroll = useAnimatedScrollHandler((event) => {
+    scrollX.value = event.contentOffset.x;
+  });
+
+  const goTo = useCallback(
+    (next: number) => {
+      listRef.current?.scrollToOffset({ offset: next * width, animated: true });
+      setIndex(next);
+    },
+    [width],
+  );
+
+  useEffect(() => {
+    if (paused || count < 2) return;
+    const timer = setTimeout(() => goTo((index + 1) % count), AUTO_ADVANCE_MS);
+    return () => clearTimeout(timer);
+  }, [index, count, paused, goTo]);
+
+  if (isPending || isError || count === 0) {
     return (
       <View style={[styles.placeholder, { width }]}>
-        {isPending && <ActivityIndicator color={colors.textMuted} />}
+        {isPending && <Skeleton height={SPOTLIGHT_HEIGHT} rounded={0} />}
       </View>
     );
   }
 
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
-  };
-
   return (
     <View>
-      <FlatList
+      <AnimatedFlatList
+        ref={listRef}
         horizontal
         pagingEnabled
         data={data}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <Slide anime={item} width={width} />}
-        onMomentumScrollEnd={handleScrollEnd}
+        renderItem={({ item, index: slideIndex }) => (
+          <Slide anime={item} rank={slideIndex + 1} index={slideIndex} width={width} scrollX={scrollX} />
+        )}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onScrollBeginDrag={() => setPaused(true)}
+        onMomentumScrollEnd={(event) => {
+          setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
+          setPaused(false);
+        }}
         showsHorizontalScrollIndicator={false}
       />
       <View style={styles.dots}>
         {data.map((anime, dotIndex) => (
-          <View key={anime.id} style={[styles.dot, dotIndex === index && styles.activeDot]} />
+          <Dot key={anime.id} index={dotIndex} width={width} scrollX={scrollX} />
         ))}
       </View>
     </View>
@@ -60,87 +96,135 @@ export function SpotlightCarousel() {
 
 interface SlideProps {
   anime: AnimeSpotlight;
+  rank: number;
+  index: number;
   width: number;
+  scrollX: SharedValue<number>;
 }
 
-function Slide({ anime, width }: SlideProps) {
+function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const title = getTitle(anime);
 
+  const imageStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: (scrollX.value - index * width) * PARALLAX }],
+  }));
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={() => router.push(`/anime/${anime.id}`)}
-      style={[styles.slide, { width }]}
-    >
-      <Image
-        source={anime.bannerImage ?? anime.coverImage}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        transition={200}
+    <View style={[styles.slide, { width }]}>
+      <Animated.View style={[StyleSheet.absoluteFill, imageStyle]}>
+        <Image
+          source={anime.bannerImage ?? anime.coverImage}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          transition={300}
+        />
+      </Animated.View>
+      <LinearGradient
+        colors={["rgba(0, 0, 0, 0.55)", "rgba(0, 0, 0, 0)"]}
+        style={styles.topShade}
       />
       <LinearGradient
-        colors={[colors.scrimTransparent, colors.scrim, colors.background]}
-        locations={[0.25, 0.75, 1]}
+        colors={[colors.scrimTransparent, withAlpha(colors.background, 0.85), colors.background]}
+        locations={[0.3, 0.7, 1]}
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.caption}>
-        <Text style={styles.title} numberOfLines={2}>
+        <View style={styles.badges}>
+          <Badge variant="accent" icon="auto_awesome" iconColor={colors.accentText} label={`#${rank} Spotlight`} />
+          {anime.averageScore !== null && (
+            <Badge icon="star" iconColor={colors.score} label={formatScore(anime.averageScore)} />
+          )}
+          {anime.format && <Badge icon="tv" label={formatEnum(anime.format)} />}
+          {anime.episodes !== null && <Badge icon="movie" label={`${anime.episodes} eps`} />}
+        </View>
+        <AppText variant="display" numberOfLines={2}>
           {title}
-        </Text>
-        <Text style={styles.meta}>{getShortMeta(anime)}</Text>
-        {anime.synopsis && (
-          <Text style={styles.synopsis} numberOfLines={3}>
-            {anime.synopsis}
-          </Text>
+        </AppText>
+        {anime.genres.length > 0 && (
+          <AppText variant="label" tone="muted" numberOfLines={1}>
+            {anime.genres.slice(0, 4).join("  •  ")}
+          </AppText>
         )}
+        {anime.synopsis && (
+          <AppText tone="muted" numberOfLines={2}>
+            {anime.synopsis}
+          </AppText>
+        )}
+        <View style={styles.actions}>
+          <Button icon="info" title="Details" onPress={() => router.push(`/anime/${anime.id}`)} />
+          <QuickWatchlistButton anime={anime} />
+        </View>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const DOT_SIZE = 6;
+const ACTIVE_DOT_WIDTH = 22;
+
+interface DotProps {
+  index: number;
+  width: number;
+  scrollX: SharedValue<number>;
+}
+
+function Dot({ index, width, scrollX }: DotProps) {
+  const styles = useStyles();
+
+  const dotStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(scrollX.value / width - index);
+    const closeness = Math.max(0, 1 - distance);
+    return {
+      width: interpolate(closeness, [0, 1], [DOT_SIZE, ACTIVE_DOT_WIDTH]),
+      opacity: interpolate(closeness, [0, 1], [0.35, 1]),
+    };
+  });
+
+  return <Animated.View style={[styles.dot, dotStyle]} />;
+}
+
+const useStyles = createStyles(({ colors }) => ({
   placeholder: {
-    height: HEIGHT,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.surface,
+    height: SPOTLIGHT_HEIGHT,
   },
   slide: {
-    height: HEIGHT,
+    height: SPOTLIGHT_HEIGHT,
     justifyContent: "flex-end",
+    overflow: "hidden",
+  },
+  topShade: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 160,
   },
   caption: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  badges: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.xs,
-    padding: spacing.lg,
   },
-  title: {
-    color: colors.text,
-    fontFamily: fonts.display,
-    fontSize: fontSize.xxl,
-  },
-  meta: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-  },
-  synopsis: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
+  actions: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   dots: {
     flexDirection: "row",
     justifyContent: "center",
     gap: spacing.xs,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.sm,
   },
   dot: {
-    width: 6,
-    height: 6,
+    height: DOT_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.border,
-  },
-  activeDot: {
-    width: 18,
     backgroundColor: colors.accent,
   },
-});
+}));

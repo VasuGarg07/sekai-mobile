@@ -1,28 +1,29 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
-import { Icon } from "@/components/ui/icon";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { Badge } from "@/components/ui/badge";
+import type { IconName } from "@/components/ui/icon";
+import { useTheme } from "@/providers/theme-provider";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { AnimeDetail } from "@/types/anime";
 import { formatEnum, formatScore } from "@/utils/anime";
 
 interface Fact {
+  icon: IconName;
   label: string;
-  value: string;
 }
 
 function getFacts(anime: AnimeDetail): Fact[] {
   const facts: (Fact | null)[] = [
-    anime.format ? { label: "Format", value: formatEnum(anime.format) } : null,
-    anime.episodes ? { label: "Episodes", value: String(anime.episodes) } : null,
-    anime.episodeDuration ? { label: "Duration", value: `${anime.episodeDuration} min` } : null,
+    anime.format ? { icon: "tv", label: formatEnum(anime.format) } : null,
+    anime.episodes ? { icon: "movie", label: `${anime.episodes} episodes` } : null,
     anime.seasonYear
       ? {
-          label: "Season",
-          value: anime.season ? `${formatEnum(anime.season)} ${anime.seasonYear}` : String(anime.seasonYear),
+          icon: "calendar_month",
+          label: anime.season ? `${formatEnum(anime.season)} ${anime.seasonYear}` : String(anime.seasonYear),
         }
       : null,
-    anime.status ? { label: "Status", value: formatEnum(anime.status) } : null,
-    anime.popularity ? { label: "Popularity", value: anime.popularity.toLocaleString() } : null,
+    anime.status ? { icon: "radio_button_checked", label: formatEnum(anime.status) } : null,
   ];
   return facts.filter((fact): fact is Fact => fact !== null);
 }
@@ -32,52 +33,25 @@ interface FactRowProps {
 }
 
 export function FactRow({ anime }: FactRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <View style={styles.row}>
       {anime.averageScore !== null && (
-        <View style={styles.fact}>
-          <View style={styles.scoreValue}>
-            <Icon name="star" size={16} color={colors.score} />
-            <Text style={styles.value}>{formatScore(anime.averageScore)}</Text>
-          </View>
-          <Text style={styles.label}>Score</Text>
-        </View>
+        <Badge variant="accent" icon="star" iconColor={colors.score} label={formatScore(anime.averageScore)} />
       )}
       {getFacts(anime).map((fact) => (
-        <View key={fact.label} style={styles.fact}>
-          <Text style={styles.value}>{fact.value}</Text>
-          <Text style={styles.label}>{fact.label}</Text>
-        </View>
+        <Badge key={fact.label} icon={fact.icon} label={fact.label} />
       ))}
-    </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   row: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  fact: {
-    minWidth: 80,
-    gap: spacing.xxs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-  },
-  scoreValue: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     gap: spacing.xs,
   },
-  value: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-  },
-  label: {
-    color: colors.textSubtle,
-    fontSize: fontSize.xs,
-  },
-});
+}));

@@ -1,32 +1,39 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
+import { StyleSheet } from "react-native";
 
-import { colors } from "@/theme";
+import { GlassTabBar, TabButton } from "@/components/navigation/glass-tab-bar";
+import { GlassBackdrop, GlassScope } from "@/components/ui/glass";
 
 export default function TabsLayout() {
   return (
-    <NativeTabs
-      backgroundColor={colors.surface}
-      indicatorColor={colors.accentMuted}
-      iconColor={{ default: colors.textMuted, selected: colors.accent }}
-      labelStyle={{ default: { color: colors.textMuted }, selected: { color: colors.text } }}
-      rippleColor={colors.accentMuted}
-    >
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="home" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="explore" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="watchlist">
-        <NativeTabs.Trigger.Label>Watchlist</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="bookmark" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="person" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <GlassScope>
+      <Tabs style={styles.fill}>
+        <GlassBackdrop style={styles.fill}>
+          <TabSlot />
+        </GlassBackdrop>
+        <TabList asChild>
+          <GlassTabBar>
+            <TabTrigger name="index" href="/" asChild>
+              <TabButton label="Home" icon="home" />
+            </TabTrigger>
+            <TabTrigger name="explore" href="/explore" asChild>
+              <TabButton label="Explore" icon="explore" />
+            </TabTrigger>
+            <TabTrigger name="watchlist" href="/watchlist" asChild>
+              <TabButton label="My List" icon="bookmarks" />
+            </TabTrigger>
+            <TabTrigger name="profile" href="/profile" asChild>
+              <TabButton label="Profile" icon="person" />
+            </TabTrigger>
+          </GlassTabBar>
+        </TabList>
+      </Tabs>
+    </GlassScope>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: {
+    flex: 1,
+  },
+});

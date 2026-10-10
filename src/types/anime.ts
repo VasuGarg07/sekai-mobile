@@ -3,6 +3,7 @@ export interface AnimeListItem {
   titleEnglish: string | null;
   titleRomaji: string | null;
   coverImage: string | null;
+  bannerImage: string | null;
   /** AniList media format: TV, MOVIE, OVA... */
   format: string | null;
   /** Minutes per episode. */
@@ -20,9 +21,7 @@ export interface AnimeListItem {
   isAdult: boolean;
 }
 
-export interface AnimeSpotlight extends AnimeListItem {
-  bannerImage: string | null;
-}
+export type AnimeSpotlight = AnimeListItem;
 
 export interface AnimeTag {
   name: string;
@@ -51,7 +50,6 @@ export interface AnimeTrailer {
 
 export interface AnimeDetail extends AnimeListItem {
   coverImageExtraLarge: string | null;
-  bannerImage: string | null;
   countryOfOrigin: string | null;
   tags: AnimeTag[];
   popularity: number | null;

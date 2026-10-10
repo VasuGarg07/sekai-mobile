@@ -1,21 +1,26 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
-import { colors, fontSize, fontWeight, POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { SectionHeader } from "@/components/ui/section-header";
+import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { AnimeRelation } from "@/types/anime";
 import { formatEnum, getTitle } from "@/utils/anime";
 
-const CARD_WIDTH = 110;
+const CARD_WIDTH = 112;
 
 interface RelationShelfProps {
   relations: AnimeRelation[];
 }
 
 export function RelationShelf({ relations }: RelationShelfProps) {
+  const styles = useStyles();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Related</Text>
+      <SectionHeader title="Related" icon="account_tree" />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {relations.map((relation) => (
           <Pressable
@@ -25,11 +30,13 @@ export function RelationShelf({ relations }: RelationShelfProps) {
             onPress={() => router.push(`/anime/${relation.id}`)}
             style={({ pressed }) => [styles.card, pressed && styles.pressed]}
           >
-            <Image source={relation.coverImage} style={styles.cover} contentFit="cover" />
-            <Text style={styles.type}>{formatEnum(relation.relationType)}</Text>
-            <Text style={styles.title} numberOfLines={2}>
+            <Image source={relation.coverImage} style={styles.cover} contentFit="cover" transition={200} />
+            <AppText variant="overline" tone="accent" numberOfLines={1}>
+              {formatEnum(relation.relationType)}
+            </AppText>
+            <AppText variant="label" numberOfLines={2}>
               {getTitle(relation)}
-            </Text>
+            </AppText>
           </Pressable>
         ))}
       </ScrollView>
@@ -37,15 +44,9 @@ export function RelationShelf({ relations }: RelationShelfProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   container: {
     gap: spacing.md,
-  },
-  heading: {
-    color: colors.text,
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
-    paddingHorizontal: spacing.lg,
   },
   list: {
     gap: spacing.md,
@@ -56,21 +57,13 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
   },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.75,
   },
   cover: {
     width: "100%",
     aspectRatio: POSTER_ASPECT_RATIO,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceRaised,
+    marginBottom: spacing.xs,
+    backgroundColor: colors.skeleton,
   },
-  type: {
-    color: colors.accent,
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold,
-  },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.sm,
-  },
-});
+}));

@@ -1,11 +1,15 @@
 import { router } from "expo-router";
-import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAddToWatchlist, useWatchStatus } from "@/hooks/use-watchlist";
 import { useAuth } from "@/providers/auth-provider";
-import { colors, fontSize, fontWeight, radius, spacing, watchStatusColors } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
 import { getTitle, WATCH_STATUS_LABELS } from "@/utils/anime";
 import { confirmTap, showMessage } from "@/utils/feedback";
@@ -16,74 +20,78 @@ interface WatchlistButtonProps {
 
 export function WatchlistButton({ anime }: WatchlistButtonProps) {
   const { user } = useAuth();
+  const { colors, statusColors } = useTheme();
+  const styles = useStyles();
   const watchStatus = useWatchStatus(anime.id);
   const addToWatchlist = useAddToWatchlist();
 
   if (!user) {
     return (
-      <Button title="Sign in to save" variant="secondary" onPress={() => router.push("/login")} />
+      <Button fullWidth icon="login" title="Sign in to save" variant="tonal" onPress={() => router.push("/login")} />
     );
   }
 
-  if (watchStatus === undefined) {
-    return <ActivityIndicator color={colors.textMuted} style={styles.loading} />;
-  }
+  if (watchStatus === undefined) return <Skeleton height={48} rounded={radius.full} />;
 
   if (watchStatus === null) {
     const handleAdd = async () => {
       const result = await addToWatchlist.mutateAsync(anime);
       if (result.success) {
         confirmTap();
-        showMessage(`Added ${getTitle(anime)} to your watchlist`);
+        showMessage(`Added ${getTitle(anime)} to your list`);
       } else if (result.message) {
         showMessage(result.message);
       }
     };
 
-    return <Button title="Add to watchlist" loading={addToWatchlist.isPending} onPress={handleAdd} />;
+    return (
+      <Button
+        fullWidth
+        icon="bookmark_add"
+        title="Add to My List"
+        loading={addToWatchlist.isPending}
+        onPress={handleAdd}
+      />
+    );
   }
-
-  const handleEdit = () =>
-    router.push({
-      pathname: "/watch-status",
-      params: { animeId: anime.id, title: getTitle(anime) },
-    });
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`In your watchlist as ${WATCH_STATUS_LABELS[watchStatus]}. Change status`}
-      onPress={handleEdit}
+      accessibilityLabel={`In your list as ${WATCH_STATUS_LABELS[watchStatus]}. Change status`}
+      onPress={() =>
+        router.push({ pathname: "/watch-status", params: { animeId: anime.id, title: getTitle(anime) } })
+      }
       style={({ pressed }) => [styles.saved, pressed && styles.pressed]}
     >
-      <Icon name="bookmark_added" size={20} color={watchStatusColors[watchStatus]} />
-      <Text style={styles.savedLabel}>{WATCH_STATUS_LABELS[watchStatus]}</Text>
-      <Icon name="chevron_right" size={20} color={colors.textMuted} />
+      <View style={[styles.statusDot, { backgroundColor: statusColors[watchStatus] }]} />
+      <AppText variant="bodyStrong" style={styles.label}>
+        {WATCH_STATUS_LABELS[watchStatus]}
+      </AppText>
+      <Icon name="edit" size={iconSize.md} color={colors.textMuted} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    minHeight: 48,
-  },
+const useStyles = createStyles(({ colors }) => ({
   saved: {
     minHeight: 48,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceRaised,
   },
   pressed: {
     opacity: 0.7,
   },
-  savedLabel: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: radius.full,
   },
-});
+  label: {
+    flex: 1,
+  },
+}));

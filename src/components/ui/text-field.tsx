@@ -1,22 +1,33 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
+import { TextInput, View, type TextInputProps } from "react-native";
 
-import { colors, fontSize, radius, spacing } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing, typography } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 interface TextFieldProps extends TextInputProps {
   label: string;
-  /** Rendered inside the field, after the input (e.g. a show/hide button). */
+  icon?: IconName;
   accessory?: ReactNode;
 }
 
-export function TextField({ label, accessory, style, ...inputProps }: TextFieldProps) {
+export function TextField({ label, icon, accessory, style, ...inputProps }: TextFieldProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <AppText variant="label" tone="muted">
+        {label}
+      </AppText>
       <View style={styles.field}>
+        {icon && <Icon name={icon} size={iconSize.md} color={colors.textSubtle} />}
         <TextInput
           accessibilityLabel={label}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.textSubtle}
+          selectionColor={colors.accent}
           style={[styles.input, style]}
           {...inputProps}
         />
@@ -26,27 +37,24 @@ export function TextField({ label, accessory, style, ...inputProps }: TextFieldP
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   container: {
     gap: spacing.xs,
-  },
-  label: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
   },
   field: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.background,
-    borderColor: colors.border,
-    borderWidth: 1,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceRaised,
   },
   input: {
+    ...typography.body,
     flex: 1,
     color: colors.text,
-    fontSize: fontSize.base,
-    paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
-});
+}));

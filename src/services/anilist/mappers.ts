@@ -16,6 +16,7 @@ export function toAnimeListItem(media: AniListMedia): AnimeListItem {
     titleEnglish: media.title?.english ?? null,
     titleRomaji: media.title?.romaji ?? null,
     coverImage: media.coverImage?.large ?? null,
+    bannerImage: media.bannerImage ?? null,
     format: media.format ?? null,
     episodeDuration: media.duration ?? null,
     averageScore: media.averageScore ?? null,
@@ -32,7 +33,7 @@ export function toAnimeListItem(media: AniListMedia): AnimeListItem {
 }
 
 export function toAnimeSpotlight(media: AniListMedia): AnimeSpotlight {
-  return { ...toAnimeListItem(media), bannerImage: media.bannerImage ?? null };
+  return toAnimeListItem(media);
 }
 
 function toAnimeRelation({ relationType, node }: AniListRelationEdge): AnimeRelation {
@@ -57,7 +58,6 @@ export function toAnimeDetail(media: AniListMedia): AnimeDetail {
   return {
     ...toAnimeListItem(media),
     coverImageExtraLarge: media.coverImage?.extraLarge ?? null,
-    bannerImage: media.bannerImage ?? null,
     countryOfOrigin: media.countryOfOrigin ?? null,
     tags: media.tags ?? [],
     popularity: media.popularity ?? null,

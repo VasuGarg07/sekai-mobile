@@ -1,8 +1,12 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { Icon } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { useReminder } from "@/hooks/use-reminder";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import { formatAiringTime } from "@/utils/anime";
 import { confirmTap, showMessage } from "@/utils/feedback";
 
@@ -13,6 +17,8 @@ interface NextEpisodeProps {
 }
 
 export function NextEpisode({ animeId, episode, airingAt }: NextEpisodeProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { enabled, toggle } = useReminder(animeId);
 
   const handleToggle = async () => {
@@ -26,64 +32,48 @@ export function NextEpisode({ animeId, episode, airingAt }: NextEpisodeProps) {
   };
 
   return (
-    <View style={styles.row}>
-      <Icon name="schedule" size={18} color={colors.accent} />
-      <Text style={styles.text}>
-        Episode {episode} airs {formatAiringTime(airingAt)}
-      </Text>
-      <Pressable
-        accessibilityRole="switch"
+    <View style={styles.card}>
+      <View style={styles.iconTile}>
+        <Icon name="schedule" size={iconSize.lg} color={colors.accentText} />
+      </View>
+      <View style={styles.text}>
+        <AppText variant="bodyStrong">Episode {episode}</AppText>
+        <AppText variant="caption" tone="muted">
+          Airs {formatAiringTime(airingAt)}
+        </AppText>
+      </View>
+      <IconButton
+        icon={enabled ? "notifications_active" : "notifications"}
+        variant="tonal"
+        active={enabled}
+        accessibilityLabel={enabled ? "Turn off episode reminders" : "Remind me when new episodes air"}
         accessibilityState={{ checked: enabled, busy: toggle.isPending }}
-        accessibilityLabel="Remind me when new episodes air"
         disabled={toggle.isPending}
         onPress={handleToggle}
-        hitSlop={8}
-        style={[styles.toggle, enabled && styles.toggleOn]}
-      >
-        <Icon
-          name={enabled ? "notifications_active" : "notifications"}
-          size={18}
-          color={enabled ? colors.accent : colors.textMuted}
-        />
-        <Text style={[styles.toggleLabel, enabled && styles.toggleLabelOn]}>
-          {enabled ? "On" : "Remind me"}
-        </Text>
-      </Pressable>
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
+const useStyles = createStyles(({ colors }) => ({
+  card: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+  },
+  iconTile: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.accentSoft,
   },
   text: {
     flex: 1,
-    color: colors.text,
-    fontSize: fontSize.md,
+    gap: spacing.xxs,
   },
-  toggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  toggleOn: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
-  },
-  toggleLabel: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
-  },
-  toggleLabelOn: {
-    color: colors.text,
-  },
-});
+}));

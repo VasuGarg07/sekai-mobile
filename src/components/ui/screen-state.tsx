@@ -1,16 +1,77 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
-import { colors, fontSize, fontWeight, lineHeight, spacing } from "@/theme";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { useTheme } from "@/providers/theme-provider";
+import { radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
-interface ScreenStateProps {
+interface MessageStateProps {
+  icon?: IconName;
   title?: string;
   message?: string;
   actionTitle?: string;
+  actionIcon?: IconName;
   onAction?: () => void;
 }
 
+export function MessageState({
+  icon,
+  title,
+  message,
+  actionTitle,
+  actionIcon,
+  onAction,
+}: MessageStateProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
+  return (
+    <View style={styles.container}>
+      {icon && (
+        <View style={styles.iconCircle}>
+          <Icon name={icon} size={32} color={colors.accentText} />
+        </View>
+      )}
+      {title && (
+        <AppText variant="headline" align="center">
+          {title}
+        </AppText>
+      )}
+      {message && (
+        <AppText tone="muted" align="center">
+          {message}
+        </AppText>
+      )}
+      {actionTitle && onAction && (
+        <Button title={actionTitle} icon={actionIcon} variant="tonal" onPress={onAction} />
+      )}
+    </View>
+  );
+}
+
+interface ErrorStateProps {
+  message?: string;
+  onRetry?: () => void;
+}
+
+export function ErrorState({ message, onRetry }: ErrorStateProps) {
+  return (
+    <MessageState
+      icon="cloud_off"
+      title="Something went wrong"
+      message={message}
+      actionTitle={onRetry ? "Try again" : undefined}
+      actionIcon="refresh"
+      onAction={onRetry}
+    />
+  );
+}
+
 export function LoadingState() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.container}>
       <ActivityIndicator color={colors.accent} size="large" />
@@ -18,47 +79,21 @@ export function LoadingState() {
   );
 }
 
-export function ErrorState({ message, onAction }: Pick<ScreenStateProps, "message" | "onAction">) {
-  return (
-    <MessageState
-      title="Something went wrong"
-      message={message}
-      actionTitle={onAction ? "Try again" : undefined}
-      onAction={onAction}
-    />
-  );
-}
-
-export function MessageState({ title, message, actionTitle, onAction }: ScreenStateProps) {
-  return (
-    <View style={styles.container}>
-      {title && <Text style={styles.title}>{title}</Text>}
-      {message && <Text style={styles.message}>{message}</Text>}
-      {actionTitle && onAction && (
-        <Button title={actionTitle} variant="secondary" size="sm" onPress={onAction} />
-      )}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
-    padding: spacing.xl,
+    padding: spacing.xxl,
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
-    textAlign: "center",
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.sm,
+    backgroundColor: colors.accentSoft,
   },
-  message: {
-    color: colors.textMuted,
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.sm,
-    textAlign: "center",
-  },
-});
+}));

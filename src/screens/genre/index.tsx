@@ -1,20 +1,25 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { InfiniteAnimeGrid } from "@/components/anime/infinite-anime-grid";
 import { Chip } from "@/components/ui/chip";
+import type { IconName } from "@/components/ui/icon";
+import { StackHeader } from "@/components/ui/page-header";
 import { MessageState } from "@/components/ui/screen-state";
-import { ScreenHeader } from "@/components/ui/screen-header";
 import { useAnimeSearch } from "@/hooks/use-anime";
 import { useAdultMode } from "@/hooks/use-preferences";
+import { useAuth } from "@/providers/auth-provider";
 import { isAdultGenre } from "@/services/anilist/anime";
-import { colors, spacing } from "@/theme";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
-const SORTS = [
-  { key: "POPULARITY_DESC", label: "Popular" },
-  { key: "SCORE_DESC", label: "Top rated" },
-  { key: "TRENDING_DESC", label: "Trending" },
-  { key: "START_DATE_DESC", label: "Newest" },
+const SORTS: { key: string; label: string; icon: IconName }[] = [
+  { key: "POPULARITY_DESC", label: "Popular", icon: "trending_up" },
+  { key: "SCORE_DESC", label: "Top rated", icon: "star" },
+  { key: "TRENDING_DESC", label: "Trending", icon: "local_fire_department" },
+  { key: "START_DATE_DESC", label: "Newest", icon: "new_releases" },
 ];
 
 interface GenreScreenProps {
@@ -22,15 +27,26 @@ interface GenreScreenProps {
 }
 
 export function GenreScreen({ genre }: GenreScreenProps) {
+  const styles = useStyles();
+  const { user } = useAuth();
   const adultMode = useAdultMode();
+  const locked = isAdultGenre(genre) && !adultMode;
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader title={genre} />
-      {isAdultGenre(genre) && !adultMode ? (
+      <StackHeader title={genre} />
+      {locked ? (
         <MessageState
+          icon="lock"
           title="This genre is 18+"
-          message="Sign in and turn on 18+ Mode in your profile to browse it."
+          message={
+            user
+              ? "Turn on 18+ Mode in your profile to browse it."
+              : "Sign in and turn on 18+ Mode to browse it."
+          }
+          actionTitle={user ? "Open profile" : "Sign in"}
+          actionIcon={user ? "settings" : "login"}
+          onAction={() => (user ? router.navigate("/profile") : router.push("/login"))}
         />
       ) : (
         <GenreResults genre={genre} />
@@ -40,6 +56,8 @@ export function GenreScreen({ genre }: GenreScreenProps) {
 }
 
 function GenreResults({ genre }: GenreScreenProps) {
+  const styles = useStyles();
+  const { bottom } = useSafeAreaInsets();
   const [sort, setSort] = useState(SORTS[0].key);
   const query = useAnimeSearch({ genreIn: [genre], sort: [sort] });
 
@@ -48,24 +66,29 @@ function GenreResults({ genre }: GenreScreenProps) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.sorts}
         style={styles.sortBar}
+        contentContainerStyle={styles.sorts}
       >
         {SORTS.map((option) => (
           <Chip
             key={option.key}
             label={option.label}
+            icon={option.icon}
             selected={option.key === sort}
             onPress={() => setSort(option.key)}
           />
         ))}
       </ScrollView>
-      <InfiniteAnimeGrid query={query} emptyMessage={`No ${genre} anime found.`} />
+      <InfiniteAnimeGrid
+        query={query}
+        emptyMessage={`No ${genre} anime found.`}
+        bottomInset={bottom + spacing.xl}
+      />
     </>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
@@ -78,4 +101,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
-});
+}));

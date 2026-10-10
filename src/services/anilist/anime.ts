@@ -68,7 +68,6 @@ const SPOTLIGHT_QUERY = /* GraphQL */ `
     Page(perPage: $perPage) {
       media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: [POPULARITY_DESC], isAdult: $isAdult) {
         ${MEDIA_LIST_FIELDS}
-        bannerImage
       }
     }
   }
@@ -79,7 +78,6 @@ const DETAIL_QUERY = /* GraphQL */ `
     Media(id: $id, type: ANIME) {
       ${MEDIA_LIST_FIELDS}
       coverImage { extraLarge large }
-      bannerImage
       countryOfOrigin
       tags { name description rank isGeneralSpoiler isMediaSpoiler }
       popularity
