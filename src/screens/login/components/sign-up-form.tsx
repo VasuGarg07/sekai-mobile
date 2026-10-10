@@ -39,6 +39,7 @@ export function SignUpForm({ email, onEmailChange, onSignedUp }: SignUpFormProps
     <View style={styles.form}>
       <TextField
         label="Name"
+        icon="person"
         value={name}
         onChangeText={setName}
         autoComplete="name"
@@ -55,7 +56,7 @@ export function SignUpForm({ email, onEmailChange, onSignedUp }: SignUpFormProps
         showRules
       />
       <FormError message={error} />
-      <Button title="Create account" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
+      <Button fullWidth icon="person_add" title="Create account" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
     </View>
   );
 }

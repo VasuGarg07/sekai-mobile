@@ -1,33 +1,54 @@
 import { FlashList } from "@shopify/flash-list";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, View } from "react-native";
 
+import { AnimeGridPlaceholder } from "@/components/anime/anime-grid";
+import { AppText } from "@/components/ui/app-text";
 import { Chip } from "@/components/ui/chip";
-import { ErrorState, LoadingState, MessageState } from "@/components/ui/screen-state";
-import { ScreenHeader } from "@/components/ui/screen-header";
+import { IconButton } from "@/components/ui/icon-button";
+import { PageHeader } from "@/components/ui/page-header";
+import { ErrorState, MessageState } from "@/components/ui/screen-state";
 import { useRefresh } from "@/hooks/use-refresh";
+import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { useAuth } from "@/providers/auth-provider";
-import { colors, fontSize, spacing } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import { WATCH_STATUSES, type WatchStatus } from "@/types/watchlist";
-import { WATCH_STATUS_LABELS } from "@/utils/anime";
+import { WATCH_STATUS_ICONS, WATCH_STATUS_LABELS } from "@/utils/anime";
 
-import { WatchlistRow } from "./components/watchlist-row";
+import { WatchlistGridCard, WatchlistRow } from "./components/watchlist-row";
+
+type ViewMode = "list" | "grid";
 
 export function WatchlistScreen() {
+  const styles = useStyles();
   const { user } = useAuth();
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+
+  const toggle = (
+    <IconButton
+      icon={viewMode === "list" ? "grid_view" : "view_list"}
+      variant="tonal"
+      accessibilityLabel={viewMode === "list" ? "Show as grid" : "Show as list"}
+      onPress={() => setViewMode((current) => (current === "list" ? "grid" : "list"))}
+    />
+  );
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader title="Watchlist" showBack={false} />
+      <PageHeader title="My List" actions={user ? toggle : undefined} />
       {user ? (
-        <WatchlistContent />
+        <WatchlistContent viewMode={viewMode} />
       ) : (
         <MessageState
-          title="Your watchlist lives here"
-          message="Sign in to save anime and pick up where you left off, on the web or here."
+          icon="bookmarks"
+          title="Your list lives here"
+          message="Sign in to save anime and pick up where you left off, here or on the web."
           actionTitle="Sign in"
+          actionIcon="login"
           onAction={() => router.push("/login")}
         />
       )}
@@ -35,7 +56,14 @@ export function WatchlistScreen() {
   );
 }
 
-function WatchlistContent() {
+interface WatchlistContentProps {
+  viewMode: ViewMode;
+}
+
+function WatchlistContent({ viewMode }: WatchlistContentProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const bottomSpace = useTabBarSpace();
   const [filter, setFilter] = useState<WatchStatus | null>(null);
   const {
     items,
@@ -56,38 +84,56 @@ function WatchlistContent() {
     [items, filter],
   );
 
-  if (isPending) return <LoadingState />;
-  if (isError) return <ErrorState message={error.message} onAction={() => refetch()} />;
-
   const handleEndReached = () => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   };
 
+  const filters = (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.filterBar}
+      contentContainerStyle={styles.filters}
+    >
+      <Chip label="All" icon="apps" selected={filter === null} onPress={() => setFilter(null)} />
+      {WATCH_STATUSES.map((status) => (
+        <Chip
+          key={status}
+          label={WATCH_STATUS_LABELS[status]}
+          icon={WATCH_STATUS_ICONS[status]}
+          selected={filter === status}
+          onPress={() => setFilter(status)}
+        />
+      ))}
+    </ScrollView>
+  );
+
+  if (isPending) {
+    return (
+      <>
+        {filters}
+        <AnimeGridPlaceholder />
+      </>
+    );
+  }
+  if (isError) return <ErrorState message={error.message} onRetry={() => refetch()} />;
+
+  const isGrid = viewMode === "grid";
+
   return (
     <>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterBar}
-        contentContainerStyle={styles.filters}
-      >
-        <Chip label="All" selected={filter === null} onPress={() => setFilter(null)} />
-        {WATCH_STATUSES.map((watchStatus) => (
-          <Chip
-            key={watchStatus}
-            label={WATCH_STATUS_LABELS[watchStatus]}
-            selected={filter === watchStatus}
-            onPress={() => setFilter(watchStatus)}
-          />
-        ))}
-      </ScrollView>
+      {filters}
       {refreshFailed && (
-        <Text style={styles.notice}>Couldn&apos;t reach AniList, so some details may be out of date.</Text>
+        <AppText variant="caption" tone="muted" style={styles.notice}>
+          Couldn&apos;t reach AniList, so some details may be out of date.
+        </AppText>
       )}
       <FlashList
+        key={viewMode}
         data={visibleItems}
+        numColumns={isGrid ? 3 : 1}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <WatchlistRow item={item} />}
+        renderItem={({ item }) => (isGrid ? <WatchlistGridCard item={item} /> : <WatchlistRow item={item} />)}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={
@@ -98,33 +144,40 @@ function WatchlistContent() {
             progressBackgroundColor={colors.surfaceRaised}
           />
         }
-        ListEmptyComponent={<EmptyWatchlist filtered={filter !== null} />}
-        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator color={colors.textMuted} /> : null}
-        contentContainerStyle={styles.list}
+        ListEmptyComponent={<EmptyList filtered={filter !== null} />}
+        ListFooterComponent={
+          isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null
+        }
+        contentContainerStyle={{
+          ...(isGrid ? styles.gridContent : undefined),
+          paddingBottom: bottomSpace,
+        }}
       />
     </>
   );
 }
 
-interface EmptyWatchlistProps {
+interface EmptyListProps {
   filtered: boolean;
 }
 
-function EmptyWatchlist({ filtered }: EmptyWatchlistProps) {
+function EmptyList({ filtered }: EmptyListProps) {
   if (filtered) {
-    return <MessageState message="Nothing with this status yet." />;
+    return <MessageState icon="filter_list_off" message="Nothing with this status yet." />;
   }
   return (
     <MessageState
-      title="Your watchlist is empty"
-      message="Find something to watch and tap “Add to watchlist”."
+      icon="bookmark_add"
+      title="Your list is empty"
+      message="Find something to watch and tap “Add to My List”."
       actionTitle="Explore anime"
+      actionIcon="explore"
       onAction={() => router.navigate("/explore")}
     />
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
@@ -137,13 +190,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
-  list: {
-    paddingBottom: spacing.xl,
-  },
   notice: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
   },
-});
+  gridContent: {
+    paddingHorizontal: spacing.md,
+  },
+  footer: {
+    paddingVertical: spacing.lg,
+  },
+}));

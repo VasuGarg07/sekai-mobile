@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/button";
+import { SheetHeader } from "@/components/ui/sheet-header";
 import { TextField } from "@/components/ui/text-field";
 import { useGenres } from "@/hooks/use-anime";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 import {
   COUNTRY_OPTIONS,
@@ -25,8 +27,10 @@ interface FilterSheetProps {
 }
 
 export function FilterSheet({ visible, filters, onApply, onClose }: FilterSheetProps) {
+  const styles = useStyles();
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable accessibilityLabel="Close filters" style={styles.backdrop} onPress={onClose} />
       {/* Remounted on every open, so the draft always starts from the applied filters. */}
       {visible && <FilterForm initial={filters} onApply={onApply} />}
@@ -45,6 +49,7 @@ const toggle = (values: string[] | undefined, key: string) =>
 const toggleSingle = (value: string | undefined, key: string) => (value === key ? undefined : key);
 
 function FilterForm({ initial, onApply }: FilterFormProps) {
+  const styles = useStyles();
   const { bottom } = useSafeAreaInsets();
   const [draft, setDraft] = useState<ExploreFilters>(initial);
   const [yearText, setYearText] = useState(initial.year ? String(initial.year) : "");
@@ -63,42 +68,48 @@ function FilterForm({ initial, onApply }: FilterFormProps) {
 
   return (
     <View style={[styles.sheet, { paddingBottom: bottom + spacing.lg }]}>
-      <Text style={styles.title}>Filters</Text>
+      <SheetHeader title="Filters" subtitle="Narrow down by format, season, genre and more" />
       <ScrollView contentContainerStyle={styles.groups} keyboardShouldPersistTaps="handled">
         <OptionGroup
           title="Sort by"
+          icon="sort"
           options={SORT_OPTIONS}
           selected={draft.sort ?? []}
           onToggle={(key) => update({ sort: draft.sort?.[0] === key ? undefined : [key] })}
         />
         <OptionGroup
           title="Format"
+          icon="tv"
           options={FORMAT_OPTIONS}
           selected={draft.formatIn ?? []}
           onToggle={(key) => update({ formatIn: toggle(draft.formatIn, key) })}
         />
         <OptionGroup
           title="Status"
+          icon="radio_button_checked"
           options={STATUS_OPTIONS}
           selected={draft.statusIn ?? []}
           onToggle={(key) => update({ statusIn: toggle(draft.statusIn, key) })}
         />
         <OptionGroup
           title="Season"
+          icon="calendar_month"
           options={SEASON_OPTIONS}
           selected={draft.season ? [draft.season] : []}
           onToggle={(key) => update({ season: toggleSingle(draft.season, key) })}
         />
         <TextField
           label="Year"
+          icon="event"
           value={yearText}
           onChangeText={setYearText}
           keyboardType="number-pad"
           maxLength={4}
-          placeholder="Any"
+          placeholder="Any year"
         />
         <OptionGroup
           title="Country"
+          icon="public"
           options={COUNTRY_OPTIONS}
           selected={draft.country ? [draft.country] : []}
           onToggle={(key) => update({ country: toggleSingle(draft.country, key) })}
@@ -111,10 +122,10 @@ function FilterForm({ initial, onApply }: FilterFormProps) {
       </ScrollView>
       <View style={styles.actions}>
         <View style={styles.action}>
-          <Button title="Reset" variant="secondary" onPress={handleReset} />
+          <Button fullWidth variant="outline" icon="restart_alt" title="Reset" onPress={handleReset} />
         </View>
         <View style={styles.action}>
-          <Button title="Apply" onPress={handleApply} />
+          <Button fullWidth icon="check" title="Apply" onPress={handleApply} />
         </View>
       </View>
     </View>
@@ -148,7 +159,8 @@ function GenreFilter({ included, excluded, onChange }: GenreFilterProps) {
 
   return (
     <OptionGroup
-      title="Genres (tap again to exclude)"
+      title="Genres"
+      icon="category"
       options={options}
       selected={[...included, ...excluded]}
       onToggle={handleToggle}
@@ -156,24 +168,19 @@ function GenreFilter({ included, excluded, onChange }: GenreFilterProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   backdrop: {
     flex: 1,
-    backgroundColor: colors.scrim,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   sheet: {
-    maxHeight: "85%",
+    maxHeight: "88%",
     gap: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
     paddingHorizontal: spacing.lg,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     backgroundColor: colors.surface,
-  },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
   },
   groups: {
     gap: spacing.xl,
@@ -186,4 +193,4 @@ const styles = StyleSheet.create({
   action: {
     flex: 1,
   },
-});
+}));

@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { TextLink } from "@/components/ui/text-link";
-import { colors, fontSize, spacing } from "@/theme";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 export type LoginMode = "signin" | "signup" | "reset";
 
@@ -11,6 +13,8 @@ interface ModeSwitchProps {
 }
 
 export function ModeSwitch({ mode, onChange }: ModeSwitchProps) {
+  const styles = useStyles();
+
   if (mode === "reset") {
     return (
       <View style={styles.row}>
@@ -23,7 +27,9 @@ export function ModeSwitch({ mode, onChange }: ModeSwitchProps) {
 
   return (
     <View style={styles.row}>
-      <Text style={styles.prompt}>{isSignIn ? "New here?" : "Already have an account?"}</Text>
+      <AppText variant="label" tone="muted">
+        {isSignIn ? "New here?" : "Already have an account?"}
+      </AppText>
       <TextLink
         title={isSignIn ? "Create an account" : "Sign in"}
         onPress={() => onChange(isSignIn ? "signup" : "signin")}
@@ -32,15 +38,11 @@ export function ModeSwitch({ mode, onChange }: ModeSwitchProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     gap: spacing.xs,
   },
-  prompt: {
-    color: colors.textMuted,
-    fontSize: fontSize.md,
-  },
-});
+}));

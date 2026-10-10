@@ -1,42 +1,44 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
 
 import { PasswordField } from "@/components/password-field";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
+import { SheetHeader } from "@/components/ui/sheet-header";
 import { useAction } from "@/hooks/use-action";
 import { useAuth } from "@/providers/auth-provider";
 import { setPassword } from "@/services/auth";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
-import { showMessage } from "@/utils/feedback";
+import { confirmTap, showMessage } from "@/utils/feedback";
 import { isStrongPassword } from "@/utils/password-rules";
 
-interface SetPasswordFormProps {
-  email: string;
-}
+import { SheetLayout } from "./sheet-layout";
 
-export function SetPasswordForm({ email }: SetPasswordFormProps) {
-  const { refreshUser } = useAuth();
+export function SetPasswordSheet() {
+  const { user, refreshUser } = useAuth();
   const [password, setPasswordValue] = useState("");
   const { run, pending, error } = useAction();
-
   const canSubmit = isStrongPassword(password);
 
   const handleSubmit = async () => {
     if (!canSubmit || pending) return;
     if (!(await run(() => setPassword(password)))) return;
 
-    setPasswordValue("");
+    confirmTap();
     showMessage("Password set. You can also sign in with your email now.");
-    await refreshUser();
+    try {
+      await refreshUser();
+    } catch {
+      // The password is already set; a failed refresh only delays the UI catching up.
+    }
+    router.back();
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Set a password</Text>
-      <Text style={styles.description}>
-        Add a password to also sign in with {email}, here or on the website.
-      </Text>
+    <SheetLayout>
+      <SheetHeader
+        title="Set a password"
+        subtitle={`Also sign in with ${user?.email ?? "your email"}, here or on the website.`}
+      />
       <PasswordField
         label="New password"
         value={password}
@@ -47,25 +49,14 @@ export function SetPasswordForm({ email }: SetPasswordFormProps) {
         showRules
       />
       <FormError message={error} />
-      <Button title="Set password" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
-    </View>
+      <Button
+        fullWidth
+        icon="key"
+        title="Set password"
+        loading={pending}
+        disabled={!canSubmit}
+        onPress={handleSubmit}
+      />
+    </SheetLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.md,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-  },
-  heading: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-  },
-  description: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-  },
-});

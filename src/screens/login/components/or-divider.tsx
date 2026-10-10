@@ -1,18 +1,23 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
-import { colors, fontSize, spacing } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 export function OrDivider() {
+  const styles = useStyles();
   return (
     <View style={styles.container}>
       <View style={styles.line} />
-      <Text style={styles.text}>or</Text>
+      <AppText variant="overline" tone="subtle">
+        or
+      </AppText>
       <View style={styles.line} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -20,12 +25,7 @@ const styles = StyleSheet.create({
   },
   line: {
     flex: 1,
-    height: StyleSheet.hairlineWidth,
+    height: 1,
     backgroundColor: colors.border,
   },
-  text: {
-    color: colors.textMuted,
-    fontSize: fontSize.xs,
-    textTransform: "uppercase",
-  },
-});
+}));

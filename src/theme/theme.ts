@@ -1,6 +1,6 @@
 import type { WatchStatus } from "@/types/watchlist";
 
-import { ACCENTS, luminance, mix, NEUTRALS, withAlpha, type AccentKey } from "./palette";
+import { ACCENTS, contrastText, luminance, mix, NEUTRALS, withAlpha, type AccentKey } from "./palette";
 
 export type ColorScheme = "light" | "dark";
 
@@ -43,6 +43,8 @@ export interface GlassStyle {
   border: string;
 }
 
+export type TintName = "red" | "amber" | "yellow" | "green" | "blue" | "indigo" | "violet" | "pink";
+
 export interface Theme {
   scheme: ColorScheme;
   dark: boolean;
@@ -50,7 +52,20 @@ export interface Theme {
   colors: ThemeColors;
   glass: GlassStyle;
   statusColors: Record<WatchStatus, string>;
+  /** Fixed colors for icon tiles and genre tiles, independent of the accent. */
+  tints: Record<TintName, string>;
 }
+
+const TINTS: Record<TintName, string> = {
+  red: "#EF4444",
+  amber: "#F5A524",
+  yellow: "#EAB308",
+  green: "#1FB980",
+  blue: "#3BA3F0",
+  indigo: "#6E6AF5",
+  violet: "#A55CF0",
+  pink: "#F0628F",
+};
 
 const STATUS_COLORS: Record<WatchStatus, string> = {
   watching: "#3B82F6",
@@ -77,7 +92,7 @@ export function createTheme(scheme: ColorScheme, accentKey: AccentKey): Theme {
       // Light accents (lime, amber) are too faint as text on a light background.
       accentText: !dark && accentIsLight ? mix(accent, "#000000", 0.3) : accent,
       accentSoft: withAlpha(accent, dark ? 0.18 : 0.14),
-      onAccent: accentIsLight ? "#111114" : "#FFFFFF",
+      onAccent: contrastText(accent),
       onImage: "#FFFFFF",
       onImageMuted: "rgba(255, 255, 255, 0.78)",
       scrim: neutral.background,
@@ -99,5 +114,6 @@ export function createTheme(scheme: ColorScheme, accentKey: AccentKey): Theme {
       border: dark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
     },
     statusColors: STATUS_COLORS,
+    tints: TINTS,
   };
 }

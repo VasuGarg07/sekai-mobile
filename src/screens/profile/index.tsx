@@ -1,92 +1,166 @@
 import { router } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, ScrollView, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
-import { MessageState } from "@/components/ui/screen-state";
+import { ListGroup, ListItem } from "@/components/ui/list-item";
+import { PageHeader } from "@/components/ui/page-header";
 import { UpdateBanner } from "@/components/update-banner";
-import { ScreenHeader } from "@/components/ui/screen-header";
+import { GITHUB_REPO, WEB_APP_URL } from "@/constants";
+import { usePreferences, useUpdatePreferences } from "@/hooks/use-preferences";
+import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useAuth } from "@/providers/auth-provider";
+import { useTheme } from "@/providers/theme-provider";
 import { currentVersion } from "@/services/app-update";
 import { signOut } from "@/services/auth";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { SekaiUser } from "@/types/user";
-import { getDisplayName, getSignInMethodsLabel, hasPassword } from "@/utils/user";
+import { WATCH_STATUS_ICONS, WATCH_STATUS_LABELS } from "@/utils/anime";
+import { confirmTap, showMessage } from "@/utils/feedback";
+import { getSignInMethodsLabel, hasPassword } from "@/utils/user";
 
-import { ExportSection } from "./components/export-section";
-import { PreferenceSection } from "./components/preference-section";
-import { SetPasswordForm } from "./components/set-password-form";
-import { VerifyEmailNote } from "./components/verify-email-note";
+import { AppearanceCard } from "./components/appearance-card";
+import { ProfileCard } from "./components/profile-card";
+
+type SettingsSheet = "default-status" | "export" | "set-password" | "verify-email";
 
 export function ProfileScreen() {
+  const { tints } = useTheme();
+  const styles = useStyles();
   const { user } = useAuth();
+  const bottomSpace = useTabBarSpace();
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader title="Profile" showBack={false} />
-      {user ? (
-        <SignedInProfile user={user} />
-      ) : (
-        <MessageState
-          title="You're browsing as a guest"
-          message="Sign in to keep a watchlist that syncs with the Sekai website."
-          actionTitle="Sign in"
-          onAction={() => router.push("/login")}
-        />
-      )}
+      <PageHeader title="Profile" />
+      <ScrollView contentContainerStyle={{ ...styles.content, paddingBottom: bottomSpace }}>
+        <ProfileCard user={user} />
+        <UpdateBanner />
+        <AppearanceCard />
+        {user && <SignedInSettings user={user} />}
+        <ListGroup title="About">
+          <ListItem icon="info" title="Version" value={currentVersion} />
+          <ListItem
+            icon="public"
+            iconColor={tints.blue}
+            title="Sekai on the web"
+            subtitle="Same account, same list"
+            onPress={() => Linking.openURL(WEB_APP_URL)}
+          />
+          <ListItem
+            icon="code"
+            iconColor={tints.indigo}
+            title="Source code"
+            subtitle={GITHUB_REPO}
+            onPress={() => Linking.openURL(`https://github.com/${GITHUB_REPO}`)}
+          />
+          <ListItem
+            icon="dataset"
+            iconColor={tints.green}
+            title="Anime data by AniList"
+            onPress={() => Linking.openURL("https://anilist.co")}
+          />
+        </ListGroup>
+      </ScrollView>
     </View>
   );
 }
 
-interface SignedInProfileProps {
+interface SignedInSettingsProps {
   user: SekaiUser;
 }
 
-function SignedInProfile({ user }: SignedInProfileProps) {
+function SignedInSettings({ user }: SignedInSettingsProps) {
+  const { statusColors, tints } = useTheme();
+  const preferences = usePreferences();
+  const updatePreferences = useUpdatePreferences();
+
+  const handleAdultMode = async (adultMode: boolean) => {
+    confirmTap();
+    const result = await updatePreferences.mutateAsync({ adultMode });
+    if (!result.success && result.message) showMessage(result.message);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch {
+      showMessage("Couldn't sign out. Please try again.");
+    }
+  };
+
+  const openSheet = (sheet: SettingsSheet) =>
+    router.push({ pathname: "/settings/[sheet]", params: { sheet } });
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <UpdateBanner />
-      <View style={styles.account}>
-        <Text style={styles.name}>{getDisplayName(user)}</Text>
-        <Text style={styles.detail}>{user.email}</Text>
-        <Text style={styles.detail}>Signed in with {getSignInMethodsLabel(user)}</Text>
-      </View>
-      {hasPassword(user) && !user.emailVerified && <VerifyEmailNote />}
-      <PreferenceSection />
-      <ExportSection />
-      {!hasPassword(user) && user.email && <SetPasswordForm email={user.email} />}
-      <Button title="Sign out" variant="secondary" onPress={signOut} />
-      <Text style={styles.version}>Sekai {currentVersion}</Text>
-    </ScrollView>
+    <>
+      <ListGroup title="My List">
+        <ListItem
+          icon={WATCH_STATUS_ICONS[preferences.defaultWatchStatus]}
+          iconColor={statusColors[preferences.defaultWatchStatus]}
+          title="Default status"
+          subtitle="Used when you add something to your list"
+          value={WATCH_STATUS_LABELS[preferences.defaultWatchStatus]}
+          onPress={() => openSheet("default-status")}
+        />
+        <ListItem
+          icon="download"
+          iconColor={tints.green}
+          title="Export list"
+          subtitle="CSV, JSON or XML"
+          onPress={() => openSheet("export")}
+        />
+      </ListGroup>
+
+      <ListGroup title="Content">
+        <ListItem
+          icon="explicit"
+          iconColor={tints.red}
+          title="18+ Mode"
+          subtitle="Show adult titles and genres. You must be 18 or older."
+          switchValue={preferences.adultMode}
+          onSwitchChange={handleAdultMode}
+          disabled={updatePreferences.isPending}
+        />
+      </ListGroup>
+
+      <ListGroup title="Account">
+        <ListItem
+          icon="badge"
+          iconColor={tints.indigo}
+          title="Signed in with"
+          value={getSignInMethodsLabel(user)}
+        />
+        {!hasPassword(user) && user.email && (
+          <ListItem
+            icon="key"
+            iconColor={tints.amber}
+            title="Set a password"
+            subtitle="Also sign in with your email"
+            onPress={() => openSheet("set-password")}
+          />
+        )}
+        {hasPassword(user) && !user.emailVerified && (
+          <ListItem
+            icon="mark_email_unread"
+            iconColor={tints.yellow}
+            title="Verify your email"
+            subtitle="So you can always reset your password"
+            onPress={() => openSheet("verify-email")}
+          />
+        )}
+        <ListItem icon="logout" title="Sign out" destructive onPress={handleSignOut} />
+      </ListGroup>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
   },
   content: {
     gap: spacing.xl,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
-  account: {
-    gap: spacing.xs,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-  },
-  name: {
-    color: colors.text,
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
-  },
-  detail: {
-    color: colors.textMuted,
-    fontSize: fontSize.md,
-  },
-  version: {
-    color: colors.textSubtle,
-    fontSize: fontSize.xs,
-    textAlign: "center",
-  },
-});
+}));

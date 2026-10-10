@@ -72,6 +72,11 @@ export function mix(hex: string, target: string, amount: number): string {
   return `#${mixed.map((value) => value.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/** Black or white, whichever reads better on the given color. */
+export function contrastText(hex: string): string {
+  return luminance(hex) > 0.45 ? "#111114" : "#FFFFFF";
+}
+
 /** WCAG relative luminance, 0 (black) to 1 (white). */
 export function luminance(hex: string): number {
   const [r, g, b] = channels(hex).map((value) => {

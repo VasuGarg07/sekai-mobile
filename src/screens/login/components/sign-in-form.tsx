@@ -41,7 +41,7 @@ export function SignInForm({ email, onEmailChange, onForgotPassword, onSignedIn 
       />
       <TextLink title="Forgot password?" onPress={onForgotPassword} style={styles.forgot} />
       <FormError message={error} />
-      <Button title="Sign in" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
+      <Button fullWidth icon="login" title="Sign in" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
     </View>
   );
 }

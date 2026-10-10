@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/ui/icon";
 import type { AnimeListItem } from "@/types/anime";
 import type { WatchStatus } from "@/types/watchlist";
 
@@ -8,6 +9,15 @@ export const WATCH_STATUS_LABELS: Record<WatchStatus, string> = {
   "plan-to-watch": "Plan to Watch",
   dropped: "Dropped",
   rewatch: "Rewatch",
+};
+
+export const WATCH_STATUS_ICONS: Record<WatchStatus, IconName> = {
+  watching: "play_circle",
+  completed: "check_circle",
+  "on-hold": "pause_circle",
+  "plan-to-watch": "bookmark",
+  dropped: "cancel",
+  rewatch: "replay",
 };
 
 export function getTitle(anime: Pick<AnimeListItem, "titleEnglish" | "titleRomaji">): string {

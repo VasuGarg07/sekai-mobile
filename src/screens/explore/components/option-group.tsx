@@ -1,21 +1,27 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
 import { Chip } from "@/components/ui/chip";
-import { colors, fontSize, fontWeight, spacing } from "@/theme";
+import type { IconName } from "@/components/ui/icon";
+import { SectionHeader } from "@/components/ui/section-header";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 import type { FilterOption } from "../filter-options";
 
 interface OptionGroupProps {
   title: string;
+  icon: IconName;
   options: FilterOption[];
   selected: string[];
   onToggle: (key: string) => void;
 }
 
-export function OptionGroup({ title, options, selected, onToggle }: OptionGroupProps) {
+export function OptionGroup({ title, icon, options, selected, onToggle }: OptionGroupProps) {
+  const styles = useStyles();
+
   return (
     <View style={styles.group}>
-      <Text style={styles.title}>{title}</Text>
+      <SectionHeader title={title} icon={icon} inset={false} />
       <View style={styles.chips}>
         {options.map((option) => (
           <Chip
@@ -30,18 +36,13 @@ export function OptionGroup({ title, options, selected, onToggle }: OptionGroupP
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   group: {
     gap: spacing.sm,
-  },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
   },
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
   },
-});
+}));

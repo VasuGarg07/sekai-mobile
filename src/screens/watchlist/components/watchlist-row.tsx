@@ -1,95 +1,116 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
-import { colors, fontSize, fontWeight, POSTER_ASPECT_RATIO, radius, spacing, watchStatusColors } from "@/theme";
+import { AppText } from "@/components/ui/app-text";
+import { IconButton } from "@/components/ui/icon-button";
+import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 import type { WatchlistItem } from "@/types/watchlist";
 import { getShortMeta, getTitle, WATCH_STATUS_LABELS } from "@/utils/anime";
 import { confirmTap } from "@/utils/feedback";
 
-const COVER_WIDTH = 56;
+import { StatusPill } from "./status-pill";
 
-interface WatchlistRowProps {
+const COVER_WIDTH = 64;
+
+interface WatchlistItemProps {
   item: WatchlistItem;
 }
 
-export function WatchlistRow({ item }: WatchlistRowProps) {
-  const title = getTitle(item);
+function openStatusSheet(item: WatchlistItem) {
+  confirmTap();
+  router.push({ pathname: "/watch-status", params: { animeId: item.id, title: getTitle(item) } });
+}
 
-  const handleOpen = () => router.push(`/anime/${item.id}`);
-  const handleChangeStatus = () => {
-    confirmTap();
-    router.push({ pathname: "/watch-status", params: { animeId: item.id, title } });
-  };
+export function WatchlistRow({ item }: WatchlistItemProps) {
+  const styles = useStyles();
+  const title = getTitle(item);
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${WATCH_STATUS_LABELS[item.watchStatus]}`}
-      accessibilityHint="Long press to change the watch status"
-      onPress={handleOpen}
-      onLongPress={handleChangeStatus}
+      accessibilityHint="Long press to change the status"
+      onPress={() => router.push(`/anime/${item.id}`)}
+      onLongPress={() => openStatusSheet(item)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <Image source={item.coverImage} style={styles.cover} contentFit="cover" />
+      <Image source={item.coverImage} style={styles.cover} contentFit="cover" transition={200} />
       <View style={styles.body}>
-        <Text style={styles.title} numberOfLines={2}>
+        <AppText variant="bodyStrong" numberOfLines={2}>
           {title}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        </AppText>
+        <AppText variant="caption" tone="subtle" numberOfLines={1}>
           {getShortMeta(item)}
-        </Text>
-        <View style={styles.status}>
-          <View style={[styles.dot, { backgroundColor: watchStatusColors[item.watchStatus] }]} />
-          <Text style={styles.statusLabel}>{WATCH_STATUS_LABELS[item.watchStatus]}</Text>
-        </View>
+        </AppText>
+        <StatusPill status={item.watchStatus} />
       </View>
+      <IconButton
+        icon="more_vert"
+        accessibilityLabel={`Change status of ${title}`}
+        onPress={() => openStatusSheet(item)}
+      />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+export function WatchlistGridCard({ item }: WatchlistItemProps) {
+  const styles = useStyles();
+  const title = getTitle(item);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, ${WATCH_STATUS_LABELS[item.watchStatus]}`}
+      accessibilityHint="Long press to change the status"
+      onPress={() => router.push(`/anime/${item.id}`)}
+      onLongPress={() => openStatusSheet(item)}
+      style={({ pressed }) => [styles.gridCard, pressed && styles.pressed]}
+    >
+      <Image source={item.coverImage} style={styles.gridCover} contentFit="cover" transition={200} />
+      <AppText variant="label" numberOfLines={2}>
+        {title}
+      </AppText>
+      <StatusPill status={item.watchStatus} />
+    </Pressable>
+  );
+}
+
+const useStyles = createStyles(({ colors }) => ({
   row: {
     flexDirection: "row",
+    alignItems: "center",
     gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
   },
   pressed: {
-    backgroundColor: colors.surface,
+    opacity: 0.75,
   },
   cover: {
     width: COVER_WIDTH,
     aspectRatio: POSTER_ASPECT_RATIO,
     borderRadius: radius.sm,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.skeleton,
   },
   body: {
     flex: 1,
-    justifyContent: "center",
     gap: spacing.xs,
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-  },
-  meta: {
-    color: colors.textSubtle,
-    fontSize: fontSize.sm,
-  },
-  status: {
-    flexDirection: "row",
-    alignItems: "center",
+  gridCard: {
+    flex: 1,
     gap: spacing.xs,
+    padding: spacing.xs,
+    paddingBottom: spacing.md,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: radius.full,
+  gridCover: {
+    width: "100%",
+    aspectRatio: POSTER_ASPECT_RATIO,
+    borderRadius: radius.md,
+    backgroundColor: colors.skeleton,
   },
-  statusLabel: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-  },
-});
+}));

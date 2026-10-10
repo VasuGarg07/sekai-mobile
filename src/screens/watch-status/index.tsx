@@ -1,15 +1,18 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
+import { SheetHeader } from "@/components/ui/sheet-header";
+import { WatchStatusPicker } from "@/components/watch-status-picker";
 import {
   useRemoveFromWatchlist,
   useUpdateWatchStatus,
   useWatchStatus,
 } from "@/hooks/use-watchlist";
-import { colors, fontSize, fontWeight, radius, spacing, watchStatusColors } from "@/theme";
-import { WATCH_STATUSES, type WatchStatus } from "@/types/watchlist";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
+import type { WatchStatus } from "@/types/watchlist";
 import { WATCH_STATUS_LABELS } from "@/utils/anime";
 import { confirmTap, showMessage } from "@/utils/feedback";
 
@@ -19,6 +22,8 @@ interface WatchStatusSheetProps {
 }
 
 export function WatchStatusSheet({ animeId, title }: WatchStatusSheetProps) {
+  const styles = useStyles();
+  const { bottom } = useSafeAreaInsets();
   const current = useWatchStatus(animeId);
   const updateStatus = useUpdateWatchStatus();
   const remove = useRemoveFromWatchlist();
@@ -43,7 +48,7 @@ export function WatchStatusSheet({ animeId, title }: WatchStatusSheetProps) {
     const result = await remove.mutateAsync(animeId);
     if (result.success) {
       confirmTap();
-      showMessage(`Removed ${title} from your watchlist`);
+      showMessage(`Removed ${title} from your list`);
       router.back();
     } else if (result.message) {
       showMessage(result.message);
@@ -51,29 +56,14 @@ export function WatchStatusSheet({ animeId, title }: WatchStatusSheetProps) {
   };
 
   return (
-    <View style={styles.sheet}>
-      <Text style={styles.title} numberOfLines={2}>
-        {title}
-      </Text>
-      <View>
-        {WATCH_STATUSES.map((watchStatus) => (
-          <Pressable
-            key={watchStatus}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: watchStatus === current, disabled: busy }}
-            disabled={busy}
-            onPress={() => handleSelect(watchStatus)}
-            style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-          >
-            <View style={[styles.dot, { backgroundColor: watchStatusColors[watchStatus] }]} />
-            <Text style={styles.rowLabel}>{WATCH_STATUS_LABELS[watchStatus]}</Text>
-            {watchStatus === current && <Icon name="check" size={20} color={colors.accent} />}
-          </Pressable>
-        ))}
-      </View>
+    <View style={[styles.sheet, { paddingBottom: bottom + spacing.lg }]}>
+      <SheetHeader title={title} subtitle="Move it to another list" />
+      <WatchStatusPicker value={current} onSelect={handleSelect} disabled={busy} />
       <Button
-        title="Remove from watchlist"
-        variant="secondary"
+        fullWidth
+        variant="danger"
+        icon="delete"
+        title="Remove from My List"
         loading={remove.isPending}
         disabled={busy}
         onPress={handleRemove}
@@ -82,34 +72,10 @@ export function WatchStatusSheet({ animeId, title }: WatchStatusSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   sheet: {
-    gap: spacing.md,
-    padding: spacing.xl,
-    backgroundColor: colors.surface,
+    gap: spacing.lg,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  pressed: {
-    opacity: 0.6,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: radius.full,
-  },
-  rowLabel: {
-    flex: 1,
-    color: colors.text,
-    fontSize: fontSize.base,
-  },
-});
+}));

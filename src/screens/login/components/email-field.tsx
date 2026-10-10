@@ -11,6 +11,7 @@ export function EmailField(props: EmailFieldProps) {
   return (
     <TextField
       label="Email"
+      icon="mail"
       keyboardType="email-address"
       autoCapitalize="none"
       autoCorrect={false}

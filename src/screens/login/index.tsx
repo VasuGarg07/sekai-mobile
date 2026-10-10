@@ -1,15 +1,19 @@
+import { Image } from "expo-image";
 import { Redirect, router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
-import { TextLink } from "@/components/ui/text-link";
+import { IconButton } from "@/components/ui/icon-button";
 import { useAction } from "@/hooks/use-action";
 import { useAuth } from "@/providers/auth-provider";
+import { useTheme } from "@/providers/theme-provider";
 import { signInWithGoogle } from "@/services/auth";
-import { colors, fontSize, fontWeight, spacing } from "@/theme";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 import { ModeSwitch, type LoginMode } from "./components/mode-switch";
 import { OrDivider } from "./components/or-divider";
@@ -17,13 +21,19 @@ import { ResetPasswordForm } from "./components/reset-password-form";
 import { SignInForm } from "./components/sign-in-form";
 import { SignUpForm } from "./components/sign-up-form";
 
-const TITLES: Record<LoginMode, string> = {
-  signin: "Sign in",
-  signup: "Create account",
-  reset: "Reset password",
+const COPY: Record<LoginMode, { title: string; subtitle: string }> = {
+  signin: { title: "Welcome back", subtitle: "Sign in to sync your list with the Sekai website." },
+  signup: { title: "Create account", subtitle: "One list for the app and the website." },
+  reset: { title: "Reset password", subtitle: "We'll email you a link to choose a new one." },
 };
 
+const LOGO_SIZE = 56;
+const logoForDark = require("@/assets/images/logo-white.png");
+const logoForLight = require("@/assets/images/logo-black.png");
+
 export function LoginScreen() {
+  const { dark } = useTheme();
+  const styles = useStyles();
   const { user } = useAuth();
   // Only an already signed-in user is redirected; a sign-in on this screen closes it itself.
   const [signedInOnOpen] = useState(user !== null);
@@ -40,20 +50,26 @@ export function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <TextLink title="Close" tone="muted" onPress={handleClose} style={styles.close} />
-          <Text style={styles.title}>{TITLES[mode]}</Text>
+          <View style={styles.topRow}>
+            <Image source={dark ? logoForDark : logoForLight} style={styles.logo} contentFit="contain" />
+            <IconButton icon="close" variant="tonal" accessibilityLabel="Close" onPress={handleClose} />
+          </View>
+
+          <View style={styles.heading}>
+            <AppText variant="display">{COPY[mode].title}</AppText>
+            <AppText tone="muted">{COPY[mode].subtitle}</AppText>
+          </View>
 
           {mode !== "reset" && (
             <>
               <Button
+                fullWidth
+                variant="outline"
+                icon="account_circle"
                 title="Continue with Google"
-                variant="light"
                 loading={google.pending}
                 onPress={handleGoogle}
               />
@@ -82,8 +98,8 @@ export function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
+const useStyles = createStyles(({ colors }) => ({
+  screen: {
     flex: 1,
     backgroundColor: colors.background,
   },
@@ -91,15 +107,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.xl,
     gap: spacing.lg,
+    padding: spacing.xl,
   },
-  close: {
-    alignSelf: "flex-end",
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
+  logo: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
   },
-});
+  heading: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+}));

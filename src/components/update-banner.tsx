@@ -1,10 +1,15 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { Icon } from "@/components/ui/icon";
 import { useAppUpdate } from "@/hooks/use-app-update";
-import { colors, fontSize, fontWeight, radius, spacing } from "@/theme";
+import { useTheme } from "@/providers/theme-provider";
+import { iconSize, radius, spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 export function UpdateBanner() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const update = useAppUpdate();
   if (!update) return null;
 
@@ -15,17 +20,21 @@ export function UpdateBanner() {
       onPress={() => Linking.openURL(update.url)}
       style={({ pressed }) => [styles.banner, pressed && styles.pressed]}
     >
-      <Icon name="system_update" size={22} color={colors.accent} />
-      <View style={styles.text}>
-        <Text style={styles.title}>Version {update.version} is available</Text>
-        <Text style={styles.subtitle}>Tap to download the new APK from GitHub</Text>
+      <View style={styles.iconTile}>
+        <Icon name="system_update" size={iconSize.md} color={colors.onAccent} />
       </View>
-      <Icon name="chevron_right" size={20} color={colors.textMuted} />
+      <View style={styles.text}>
+        <AppText variant="bodyStrong">Version {update.version} is available</AppText>
+        <AppText variant="caption" tone="muted">
+          Tap to download the new APK from GitHub
+        </AppText>
+      </View>
+      <Icon name="open_in_new" size={iconSize.md} color={colors.accentText} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(({ colors }) => ({
   banner: {
     flexDirection: "row",
     alignItems: "center",
@@ -34,22 +43,21 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
+    backgroundColor: colors.accentSoft,
   },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.75,
+  },
+  iconTile: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.accent,
   },
   text: {
     flex: 1,
     gap: spacing.xxs,
   },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-  },
-});
+}));

@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
+import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
+import { MessageState } from "@/components/ui/screen-state";
 import { useAction } from "@/hooks/use-action";
 import { sendPasswordReset } from "@/services/auth";
-import { colors, fontSize, lineHeight, spacing } from "@/theme";
+import { spacing } from "@/theme";
+import { createStyles } from "@/theme/create-styles";
 
 import { EmailField } from "./email-field";
 
@@ -15,6 +18,7 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ email, onEmailChange }: ResetPasswordFormProps) {
+  const styles = useStyles();
   const [sentTo, setSentTo] = useState<string | null>(null);
   const { run, pending, error } = useAction();
 
@@ -27,37 +31,35 @@ export function ResetPasswordForm({ email, onEmailChange }: ResetPasswordFormPro
 
   if (sentTo) {
     return (
-      <Text style={styles.message}>
-        If an account exists for {sentTo}, we&apos;ve sent it a link to reset the password. Check
-        your spam folder too.
-      </Text>
+      <MessageState
+        icon="mark_email_read"
+        title="Check your inbox"
+        message={`If an account exists for ${sentTo}, we've sent it a link to reset the password. Check your spam folder too.`}
+      />
     );
   }
 
   return (
     <View style={styles.form}>
-      <Text style={styles.hint}>
+      <AppText tone="muted">
         Enter the email you signed up with and we&apos;ll send you a link to choose a new password.
-      </Text>
+      </AppText>
       <EmailField value={email} onChangeText={onEmailChange} onSubmitEditing={handleSubmit} />
       <FormError message={error} />
-      <Button title="Send reset link" loading={pending} disabled={!canSubmit} onPress={handleSubmit} />
+      <Button
+        fullWidth
+        icon="send"
+        title="Send reset link"
+        loading={pending}
+        disabled={!canSubmit}
+        onPress={handleSubmit}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles(() => ({
   form: {
     gap: spacing.lg,
   },
-  hint: {
-    color: colors.textMuted,
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.sm,
-  },
-  message: {
-    color: colors.text,
-    fontSize: fontSize.base,
-    lineHeight: lineHeight.md,
-  },
-});
+}));
