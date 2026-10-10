@@ -42,7 +42,6 @@ export function ProfileScreen() {
             icon="public"
             iconColor={tints.blue}
             title="Sekai on the web"
-            subtitle="Same account, same list"
             onPress={() => Linking.openURL(WEB_APP_URL)}
           />
           <ListItem
@@ -103,7 +102,6 @@ function SignedInSettings({ user }: SignedInSettingsProps) {
           subtitle="Show adult titles and genres. You must be 18 or older."
           switchValue={preferences.adultMode}
           onSwitchChange={handleAdultMode}
-          disabled={updatePreferences.isPending}
         />
       </ListGroup>
 

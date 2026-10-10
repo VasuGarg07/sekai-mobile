@@ -1,8 +1,9 @@
 import { Children, Fragment, isValidElement, type ReactNode } from "react";
-import { Pressable, Switch, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { Toggle } from "@/components/ui/toggle";
 import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -43,14 +44,13 @@ export function ListItem({
   const tint = destructive ? colors.danger : (iconColor ?? colors.accent);
   const glyphColor = tint === colors.accent ? colors.onAccent : colors.onImage;
 
-  const handlePress = isSwitch ? () => onSwitchChange?.(!switchValue) : onPress;
-
+  // Switch rows are not pressable themselves; only the Toggle reacts, so taps beside it do nothing.
   return (
     <Pressable
-      accessibilityRole={isSwitch ? "switch" : "button"}
-      accessibilityState={{ checked: isSwitch ? switchValue : undefined, disabled }}
-      disabled={disabled || !handlePress}
-      onPress={handlePress}
+      accessibilityRole={isSwitch ? undefined : "button"}
+      accessibilityState={{ disabled }}
+      disabled={disabled || isSwitch || !onPress}
+      onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed, disabled && styles.disabled]}
     >
       {icon && (
@@ -75,12 +75,11 @@ export function ListItem({
       )}
       {trailing}
       {isSwitch && (
-        <Switch
+        <Toggle
           value={switchValue}
-          onValueChange={onSwitchChange}
+          onValueChange={(next) => onSwitchChange?.(next)}
           disabled={disabled}
-          trackColor={{ false: colors.borderStrong, true: colors.accent }}
-          thumbColor={colors.onImage}
+          accessibilityLabel={title}
         />
       )}
       {!isSwitch && onPress && !trailing && (

@@ -35,8 +35,8 @@ export function useUpdatePreferences() {
       if (!user) return { success: false, message: "Sign in to change your settings." };
       return updatePreferences(user.uid, updates);
     },
-    onMutate: async (updates) => {
-      await queryClient.cancelQueries({ queryKey });
+    // Synchronous so a controlled Switch never renders the old value between tap and update.
+    onMutate: (updates) => {
       const previous = queryClient.getQueryData<Preferences>(queryKey);
       queryClient.setQueryData<Preferences>(queryKey, (current) => ({
         ...(current ?? DEFAULT_PREFERENCES),

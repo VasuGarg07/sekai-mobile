@@ -4,7 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, type ComponentProps } from "react";
 
 import { queryClient } from "@/lib/query-client";
-import { AuthProvider } from "@/providers/auth-provider";
+import { AuthProvider, useAuth } from "@/providers/auth-provider";
 import { ThemeProvider, useTheme } from "@/providers/theme-provider";
 import { radius } from "@/theme";
 
@@ -26,9 +26,11 @@ export default function RootLayout() {
 
 function AppNavigator() {
   const theme = useTheme();
+  const { initialized } = useAuth();
+  // Until Firebase restores the saved session, screens would render as signed out.
   useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
+    if (initialized) SplashScreen.hideAsync();
+  }, [initialized]);
 
   const screenOptions = useMemo<StackOptions>(
     () => ({
