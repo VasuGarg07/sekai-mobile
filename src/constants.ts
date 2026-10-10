@@ -40,5 +40,5 @@ export const RANKED_LISTS: Record<RankedListKind, RankedList> = {
 };
 
 export function isRankedListKind(value: string): value is RankedListKind {
-  return value in RANKED_LISTS;
+  return typeof value === "string" && Object.hasOwn(RANKED_LISTS, value);
 }
