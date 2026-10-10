@@ -33,7 +33,7 @@ export function formatScore(averageScore: number): string {
 export function getShortMeta(anime: AnimeListItem): string {
   const parts = [
     anime.format,
-    anime.episodes ? `${anime.episodes} eps` : null,
+    anime.episodes ? `${anime.episodes} Ep` : null,
     anime.seasonYear ? String(anime.seasonYear) : null,
   ];
   return parts.filter(Boolean).join(" • ");

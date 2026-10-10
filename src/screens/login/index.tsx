@@ -12,7 +12,7 @@ import { useAction } from "@/hooks/use-action";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { signInWithGoogle } from "@/services/auth";
-import { spacing } from "@/theme";
+import { iconSize, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 
 import { ModeSwitch, type LoginMode } from "./components/mode-switch";
@@ -30,6 +30,7 @@ const COPY: Record<LoginMode, { title: string; subtitle: string }> = {
 const LOGO_SIZE = 56;
 const logoForDark = require("@/assets/images/logo-white.png");
 const logoForLight = require("@/assets/images/logo-black.png");
+const googleLogo = require("@/assets/images/google.svg");
 
 export function LoginScreen() {
   const { dark } = useTheme();
@@ -68,7 +69,7 @@ export function LoginScreen() {
               <Button
                 fullWidth
                 variant="outline"
-                icon="account_circle"
+                leading={<Image source={googleLogo} style={styles.googleLogo} contentFit="contain" />}
                 title="Continue with Google"
                 loading={google.pending}
                 onPress={handleGoogle}
@@ -118,6 +119,10 @@ const useStyles = createStyles(({ colors }) => ({
   logo: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
+  },
+  googleLogo: {
+    width: iconSize.md,
+    height: iconSize.md,
   },
   heading: {
     gap: spacing.xs,

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
@@ -13,6 +14,8 @@ type ButtonSize = "md" | "sm";
 interface ButtonProps extends Omit<PressableProps, "children" | "style"> {
   title: string;
   icon?: IconName;
+  /** Custom leading element (e.g. a brand logo); takes precedence over `icon`. */
+  leading?: ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -31,6 +34,7 @@ const CONTENT_COLORS: Record<ButtonVariant, keyof ThemeColors> = {
 export function Button({
   title,
   icon,
+  leading,
   variant = "filled",
   size = "md",
   loading = false,
@@ -49,7 +53,8 @@ export function Button({
         <ActivityIndicator color={contentColor} />
       ) : (
         <>
-          {icon && <Icon name={icon} size={size === "sm" ? iconSize.sm : iconSize.md} color={contentColor} />}
+          {leading}
+          {!leading && icon && <Icon name={icon} size={size === "sm" ? iconSize.sm : iconSize.md} color={contentColor} />}
           <AppText variant={size === "sm" ? "label" : "bodyStrong"} style={{ color: contentColor }}>
             {title}
           </AppText>
