@@ -22,17 +22,19 @@ export function ProfileCard({ user }: ProfileCardProps) {
 
   if (!user) {
     return (
-      <View style={styles.card}>
+      <View style={styles.guestCard}>
         <View style={styles.guestIcon}>
           <Icon name="person" size={32} color={colors.accentText} />
         </View>
-        <View style={styles.text}>
-          <AppText variant="subtitle">You&apos;re browsing as a guest</AppText>
-          <AppText variant="caption" tone="muted">
+        <View style={styles.guestText}>
+          <AppText variant="subtitle" style={styles.centered}>
+            You&apos;re browsing as a guest
+          </AppText>
+          <AppText variant="caption" tone="muted" style={styles.centered}>
             Sign in to keep a list that syncs with the Sekai website.
           </AppText>
         </View>
-        <Button size="sm" icon="login" title="Sign in" onPress={() => router.push("/login")} />
+        <Button fullWidth icon="login" title="Sign in" onPress={() => router.push("/login")} />
       </View>
     );
   }
@@ -71,6 +73,20 @@ const useStyles = createStyles(({ colors }) => ({
     padding: spacing.lg,
     borderRadius: radius.xl,
     backgroundColor: colors.surface,
+  },
+  guestCard: {
+    alignItems: "center",
+    gap: spacing.lg,
+    padding: spacing.xl,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+  },
+  guestText: {
+    alignSelf: "stretch",
+    gap: spacing.xs,
+  },
+  centered: {
+    textAlign: "center",
   },
   guestIcon: {
     width: 56,
