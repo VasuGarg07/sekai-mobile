@@ -5,10 +5,13 @@ import { useEffect, useMemo, type ComponentProps } from "react";
 
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
+import { ExploreFiltersProvider } from "@/providers/explore-filters-provider";
 import { ThemeProvider, useTheme } from "@/providers/theme-provider";
 import { radius } from "@/theme";
 
 SplashScreen.preventAutoHideAsync();
+
+const FILTER_SHEET_DETENT = 0.88;
 
 type StackOptions = ComponentProps<typeof Stack>["screenOptions"];
 
@@ -17,7 +20,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <AppNavigator />
+          <ExploreFiltersProvider>
+            <AppNavigator />
+          </ExploreFiltersProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
@@ -63,6 +68,7 @@ function AppNavigator() {
         <Stack.Screen name="login" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
         <Stack.Screen name="watch-status" options={sheetOptions} />
         <Stack.Screen name="settings/[sheet]" options={sheetOptions} />
+        <Stack.Screen name="explore-filters" options={{ ...sheetOptions, sheetAllowedDetents: [FILTER_SHEET_DETENT] }} />
       </Stack>
     </>
   );

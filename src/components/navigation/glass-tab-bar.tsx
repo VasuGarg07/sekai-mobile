@@ -22,7 +22,7 @@ export function GlassTabBar({ children, style, ...viewProps }: GlassTabBarProps)
 
   return (
     <View pointerEvents="box-none" style={[styles.wrapper, { bottom: bottom + spacing.sm }]}>
-      <GlassView style={[styles.bar, style]} {...viewProps}>
+      <GlassView strong style={[styles.bar, style]} {...viewProps}>
         {children}
       </GlassView>
     </View>

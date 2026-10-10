@@ -106,7 +106,7 @@ export function createTheme(scheme: ColorScheme, accentKey: AccentKey): Theme {
     },
     glass: {
       fill: dark ? "rgba(22, 22, 28, 0.82)" : "rgba(255, 255, 255, 0.86)",
-      fillStrong: dark ? "rgba(14, 14, 18, 0.9)" : "rgba(255, 255, 255, 0.92)",
+      fillStrong: dark ? "rgba(14, 14, 18, 0.98)" : "rgba(255, 255, 255, 0.98)",
       border: dark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
     },
     statusColors: STATUS_COLORS,

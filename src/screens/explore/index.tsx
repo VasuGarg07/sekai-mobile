@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
 
@@ -6,14 +7,14 @@ import { Icon } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useExploreFilters } from "@/providers/explore-filters-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing, typography } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 
-import { FilterSheet } from "./components/filter-sheet";
 import { GenreList } from "./components/genre-list";
 import { SearchResults } from "./components/search-results";
-import { countActiveFilters, type ExploreFilters } from "./filter-options";
+import { countActiveFilters } from "./filter-options";
 
 const SEARCH_DELAY_MS = 400;
 
@@ -21,15 +22,9 @@ export function ExploreScreen() {
   const { colors } = useTheme();
   const styles = useStyles();
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<ExploreFilters>({});
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { filters } = useExploreFilters();
   const term = useDebouncedValue(search.trim(), SEARCH_DELAY_MS);
   const activeFilterCount = countActiveFilters(filters);
-
-  const handleApplyFilters = (next: ExploreFilters) => {
-    setFilters(next);
-    setFiltersOpen(false);
-  };
 
   return (
     <View style={styles.screen}>
@@ -65,7 +60,7 @@ export function ExploreScreen() {
             variant="tonal"
             active={activeFilterCount > 0}
             accessibilityLabel={activeFilterCount > 0 ? `Filters, ${activeFilterCount} active` : "Filters"}
-            onPress={() => setFiltersOpen(true)}
+            onPress={() => router.navigate("/explore-filters")}
           />
           {activeFilterCount > 0 && (
             <View style={styles.badge}>
@@ -79,12 +74,6 @@ export function ExploreScreen() {
 
       {term || activeFilterCount > 0 ? <SearchResults search={term} filters={filters} /> : <GenreList />}
 
-      <FilterSheet
-        visible={filtersOpen}
-        filters={filters}
-        onApply={handleApplyFilters}
-        onClose={() => setFiltersOpen(false)}
-      />
     </View>
   );
 }

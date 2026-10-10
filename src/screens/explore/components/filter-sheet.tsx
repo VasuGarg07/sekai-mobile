@@ -1,12 +1,14 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/button";
 import { SheetHeader } from "@/components/ui/sheet-header";
 import { TextField } from "@/components/ui/text-field";
 import { useGenres } from "@/hooks/use-anime";
-import { radius, spacing } from "@/theme";
+import { useExploreFilters } from "@/providers/explore-filters-provider";
+import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 
 import {
@@ -19,46 +21,24 @@ import {
 } from "../filter-options";
 import { OptionGroup } from "./option-group";
 
-interface FilterSheetProps {
-  visible: boolean;
-  filters: ExploreFilters;
-  onApply: (filters: ExploreFilters) => void;
-  onClose: () => void;
-}
-
-export function FilterSheet({ visible, filters, onApply, onClose }: FilterSheetProps) {
-  const styles = useStyles();
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable accessibilityLabel="Close filters" style={styles.backdrop} onPress={onClose} />
-      {/* Remounted on every open, so the draft always starts from the applied filters. */}
-      {visible && <FilterForm initial={filters} onApply={onApply} />}
-    </Modal>
-  );
-}
-
-interface FilterFormProps {
-  initial: ExploreFilters;
-  onApply: (filters: ExploreFilters) => void;
-}
-
 const toggle = (values: string[] | undefined, key: string) =>
   values?.includes(key) ? values.filter((value) => value !== key) : [...(values ?? []), key];
 
 const toggleSingle = (value: string | undefined, key: string) => (value === key ? undefined : key);
 
-function FilterForm({ initial, onApply }: FilterFormProps) {
+export function FilterSheet() {
   const styles = useStyles();
   const { bottom } = useSafeAreaInsets();
-  const [draft, setDraft] = useState<ExploreFilters>(initial);
-  const [yearText, setYearText] = useState(initial.year ? String(initial.year) : "");
+  const { filters, setFilters } = useExploreFilters();
+  const [draft, setDraft] = useState<ExploreFilters>(filters);
+  const [yearText, setYearText] = useState(filters.year ? String(filters.year) : "");
 
   const update = (changes: Partial<ExploreFilters>) => setDraft((current) => ({ ...current, ...changes }));
 
   const handleApply = () => {
     const year = Number(yearText);
-    onApply({ ...draft, year: Number.isInteger(year) && year > 1900 ? year : undefined });
+    setFilters({ ...draft, year: Number.isInteger(year) && year > 1900 ? year : undefined });
+    router.back();
   };
 
   const handleReset = () => {
@@ -168,19 +148,12 @@ function GenreFilter({ included, excluded, onChange }: GenreFilterProps) {
   );
 }
 
-const useStyles = createStyles(({ colors }) => ({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
+const useStyles = createStyles(() => ({
   sheet: {
-    maxHeight: "88%",
+    flex: 1,
     gap: spacing.lg,
     paddingTop: spacing.md,
     paddingHorizontal: spacing.lg,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    backgroundColor: colors.surface,
   },
   groups: {
     gap: spacing.xl,
