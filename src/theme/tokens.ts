@@ -49,6 +49,10 @@ export const typography: Record<TextVariant, TextStyle> = {
   },
 };
 
+export function getTextHeight(variant: TextVariant, lines: number) {
+  return (typography[variant].lineHeight ?? 0) * lines;
+}
+
 export const iconSize = {
   sm: 16,
   md: 20,

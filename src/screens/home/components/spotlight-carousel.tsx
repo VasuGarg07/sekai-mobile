@@ -23,7 +23,8 @@ import { createStyles } from "@/theme/create-styles";
 import type { AnimeSpotlight } from "@/types/anime";
 import { formatEnum, formatScore, getTitle } from "@/utils/anime";
 
-export const SPOTLIGHT_HEIGHT = 560;
+export const SPOTLIGHT_HEIGHT = 480;
+const BANNER_HEIGHT = 330;
 const AUTO_ADVANCE_MS = 6_000;
 const PARALLAX = 0.35;
 
@@ -113,23 +114,25 @@ function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
 
   return (
     <View style={[styles.slide, { width }]}>
-      <Animated.View style={[StyleSheet.absoluteFill, imageStyle]}>
-        <Image
-          source={anime.bannerImage ?? anime.coverImage}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          transition={300}
+      <View style={styles.banner}>
+        <Animated.View style={[StyleSheet.absoluteFill, imageStyle]}>
+          <Image
+            source={anime.bannerImage ?? anime.coverImage}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={300}
+          />
+        </Animated.View>
+        <LinearGradient
+          colors={["rgba(0, 0, 0, 0.55)", "rgba(0, 0, 0, 0)"]}
+          style={styles.topShade}
         />
-      </Animated.View>
-      <LinearGradient
-        colors={["rgba(0, 0, 0, 0.55)", "rgba(0, 0, 0, 0)"]}
-        style={styles.topShade}
-      />
-      <LinearGradient
-        colors={[colors.scrimTransparent, withAlpha(colors.background, 0.85), colors.background]}
-        locations={[0.3, 0.7, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+        <LinearGradient
+          colors={[colors.scrimTransparent, withAlpha(colors.background, 0.85), colors.background]}
+          locations={[0.45, 0.8, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
       <View style={styles.caption}>
         <View style={styles.badges}>
           <Badge variant="accent" icon="auto_awesome" iconColor={colors.accentText} label={`#${rank} Now`} />
@@ -145,11 +148,6 @@ function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
         {anime.genres.length > 0 && (
           <AppText variant="label" tone="muted" numberOfLines={1}>
             {anime.genres.slice(0, 4).join("  •  ")}
-          </AppText>
-        )}
-        {anime.synopsis && (
-          <AppText tone="muted" numberOfLines={2}>
-            {anime.synopsis}
           </AppText>
         )}
         <View style={styles.actions}>
@@ -192,6 +190,15 @@ const useStyles = createStyles(({ colors }) => ({
   slide: {
     height: SPOTLIGHT_HEIGHT,
     justifyContent: "flex-end",
+    overflow: "hidden",
+    backgroundColor: colors.background,
+  },
+  banner: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: BANNER_HEIGHT,
     overflow: "hidden",
   },
   topShade: {

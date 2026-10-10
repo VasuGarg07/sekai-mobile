@@ -4,7 +4,7 @@ import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { IconButton } from "@/components/ui/icon-button";
-import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
+import { POSTER_ASPECT_RATIO, getTextHeight, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { WatchlistItem } from "@/types/watchlist";
 import { getShortMeta, getTitle, WATCH_STATUS_LABELS } from "@/utils/anime";
@@ -38,7 +38,7 @@ export function WatchlistRow({ item }: WatchlistItemProps) {
     >
       <Image source={item.coverImage} style={styles.cover} contentFit="cover" transition={200} />
       <View style={styles.body}>
-        <AppText variant="bodyStrong" numberOfLines={2}>
+        <AppText variant="bodyStrong" numberOfLines={2} style={styles.rowTitle}>
           {title}
         </AppText>
         <AppText variant="caption" tone="subtle" numberOfLines={1}>
@@ -69,7 +69,7 @@ export function WatchlistGridCard({ item }: WatchlistItemProps) {
       style={({ pressed }) => [styles.gridCard, pressed && styles.pressed]}
     >
       <Image source={item.coverImage} style={styles.gridCover} contentFit="cover" transition={200} />
-      <AppText variant="label" numberOfLines={2}>
+      <AppText variant="label" numberOfLines={2} style={styles.gridTitle}>
         {title}
       </AppText>
       <StatusPill status={item.watchStatus} />
@@ -100,6 +100,12 @@ const useStyles = createStyles(({ colors }) => ({
   body: {
     flex: 1,
     gap: spacing.xs,
+  },
+  rowTitle: {
+    minHeight: getTextHeight("bodyStrong", 2),
+  },
+  gridTitle: {
+    minHeight: getTextHeight("label", 2),
   },
   gridCard: {
     flex: 1,

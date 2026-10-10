@@ -40,7 +40,7 @@ export function PosterCard({ anime, width }: PosterCardProps) {
           </View>
         )}
       </View>
-      <AppText variant="label" numberOfLines={2}>
+      <AppText variant="label" numberOfLines={1}>
         {title}
       </AppText>
       <AppText variant="caption" tone="subtle" numberOfLines={1}>

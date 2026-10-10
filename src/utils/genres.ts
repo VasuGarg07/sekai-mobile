@@ -9,18 +9,18 @@ const GENRE_ICONS: Record<string, IconName> = {
   ecchi: "favorite_border",
   fantasy: "castle",
   hentai: "explicit",
-  horror: "skull",
+  horror: "mood_bad",
   "mahou shoujo": "auto_awesome",
   mecha: "smart_toy",
   music: "music_note",
   mystery: "search",
-  psychological: "psychiatry",
+  psychological: "psychology",
   romance: "favorite",
   "sci-fi": "rocket_launch",
   "slice of life": "local_cafe",
   sports: "sports_soccer",
   supernatural: "nightlight",
-  thriller: "swords",
+  thriller: "sports_martial_arts",
 };
 
 const GENRE_TINTS: TintName[] = ["red", "blue", "violet", "green", "amber", "pink", "indigo", "yellow"];
