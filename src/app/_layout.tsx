@@ -7,7 +7,6 @@ import { useEffect, useMemo, type ComponentProps } from "react";
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider, useTheme } from "@/providers/theme-provider";
-import { syncReminders } from "@/services/reminders";
 import { radius } from "@/theme";
 
 SplashScreen.preventAutoHideAsync();
@@ -34,10 +33,6 @@ function AppNavigator() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
-
-  useEffect(() => {
-    syncReminders().catch((error) => console.warn("Couldn't refresh episode reminders:", error));
-  }, []);
 
   const screenOptions = useMemo<StackOptions>(
     () => ({

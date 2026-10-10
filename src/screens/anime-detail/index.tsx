@@ -127,7 +127,6 @@ function DetailContent({ anime, adultMode, refetch }: DetailContentProps) {
             </View>
             {anime.nextEpisode && (
               <NextEpisode
-                animeId={anime.id}
                 episode={anime.nextEpisode.episode}
                 airingAt={anime.nextEpisode.airingAt}
               />
