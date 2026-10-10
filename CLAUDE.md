@@ -58,6 +58,7 @@ src/
 - Derive values during render instead of storing them in state. Put user-triggered logic in event handlers. Use effects only to sync with something outside React (subscriptions, native APIs).
 - Prefer early returns over nested conditionals. No nested ternaries in JSX.
 - Keep components small. If a component needs scrolling to understand, extract components or a hook.
+- Every screen that shows server data supports pull to refresh: a `RefreshControl` on its scroll view or list, wired to the query's `refetch`.
 
 ## Styling
 
@@ -74,7 +75,9 @@ src/
 
 ## Errors
 
-- Services return `{ success: true } | { success: false; message }` with user-facing messages, and don't throw to the UI.
+- Reads used by TanStack Query throw (`AniListError` for AniList), so queries get error states and retries.
+- Writes and auth actions return `ActionResult` (`{ success: true } | { success: false; message }`) with a user-facing message, and don't throw to the UI.
 - `message: null` means there is nothing to show (e.g. the user cancelled).
+- Firestore document shapes (snake_case fields) stay inside `services/`; the rest of the app uses the camelCase types in `types/`.
 - Never swallow an error silently unless the reason is obvious from the code or stated in a comment.
 - No `console.log`. `console.warn` only for failures we deliberately don't surface to the user.
