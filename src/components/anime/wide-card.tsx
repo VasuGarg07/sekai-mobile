@@ -36,9 +36,6 @@ export function WideCard({ anime }: WideCardProps) {
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.caption}>
-        {anime.status && (
-          <Badge variant="glass" icon="live_tv" iconColor={colors.accent} label={formatEnum(anime.status)} />
-        )}
         <AppText variant="subtitle" tone="onImage" numberOfLines={2}>
           {title}
         </AppText>

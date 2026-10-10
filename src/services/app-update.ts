@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 
-import { GITHUB_REPO } from "@/constants";
+const GITHUB_REPO = "VasuGarg07/sekai-mobile";
 
 export interface AppUpdate {
   version: string;

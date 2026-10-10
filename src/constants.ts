@@ -2,7 +2,6 @@ import type { IconName } from "@/components/ui/icon";
 
 export const WEB_APP_URL = "https://sekai-arcadia.web.app";
 
-export const GITHUB_REPO = "VasuGarg07/sekai-mobile";
 
 // Must match maxWatchlistSize() in sekai-web/firestore.rules.
 export const MAX_WATCHLIST_SIZE = 2000;

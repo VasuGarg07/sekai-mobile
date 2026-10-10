@@ -27,7 +27,7 @@ export function Badge({ label, icon, iconColor, variant = "surface" }: BadgeProp
     <>
       {icon && <Icon name={icon} size={ICON_SIZE} color={iconColor ?? colors.textMuted} />}
       <AppText variant="caption" tone={tone} style={styles.label}>
-        {label}
+        {label.toUpperCase()}
       </AppText>
     </>
   );

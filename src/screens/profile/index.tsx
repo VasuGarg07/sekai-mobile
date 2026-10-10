@@ -4,7 +4,7 @@ import { Linking, ScrollView, View } from "react-native";
 import { ListGroup, ListItem } from "@/components/ui/list-item";
 import { PageHeader } from "@/components/ui/page-header";
 import { UpdateBanner } from "@/components/update-banner";
-import { GITHUB_REPO, WEB_APP_URL } from "@/constants";
+import { WEB_APP_URL } from "@/constants";
 import { usePreferences, useUpdatePreferences } from "@/hooks/use-preferences";
 import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useAuth } from "@/providers/auth-provider";
@@ -45,13 +45,6 @@ export function ProfileScreen() {
             title="Sekai on the web"
             subtitle="Same account, same list"
             onPress={() => Linking.openURL(WEB_APP_URL)}
-          />
-          <ListItem
-            icon="code"
-            iconColor={tints.indigo}
-            title="Source code"
-            subtitle={GITHUB_REPO}
-            onPress={() => Linking.openURL(`https://github.com/${GITHUB_REPO}`)}
           />
           <ListItem
             icon="dataset"

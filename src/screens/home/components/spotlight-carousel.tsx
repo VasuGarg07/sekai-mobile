@@ -132,7 +132,7 @@ function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
       />
       <View style={styles.caption}>
         <View style={styles.badges}>
-          <Badge variant="accent" icon="auto_awesome" iconColor={colors.accentText} label={`#${rank} Spotlight`} />
+          <Badge variant="accent" icon="auto_awesome" iconColor={colors.accentText} label={`#${rank} Now`} />
           {anime.averageScore !== null && (
             <Badge icon="star" iconColor={colors.score} label={formatScore(anime.averageScore)} />
           )}
