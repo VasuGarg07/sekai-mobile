@@ -7,7 +7,6 @@ import { AnimeShelf } from "@/components/anime/anime-shelf";
 import { WatchlistButton } from "@/components/anime/watchlist-button";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
-import { GlassBackdrop, GlassScope } from "@/components/ui/glass";
 import { StackHeader } from "@/components/ui/page-header";
 import { ErrorState, MessageState } from "@/components/ui/screen-state";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -99,65 +98,63 @@ function DetailContent({ anime, adultMode, refetch }: DetailContentProps) {
   };
 
   return (
-    <GlassScope>
-      <GlassBackdrop style={styles.screen}>
-        <Animated.ScrollView
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ ...styles.content, paddingBottom: bottom + spacing.xxl }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[colors.accent]}
-              progressBackgroundColor={colors.surfaceRaised}
-              progressViewOffset={spacing.xxxl}
-            />
-          }
-        >
-          <DetailHero anime={anime} scrollY={scrollY} />
+    <View style={styles.screen}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ ...styles.content, paddingBottom: bottom + spacing.xxl }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.accent]}
+            progressBackgroundColor={colors.surfaceRaised}
+            progressViewOffset={spacing.xxxl}
+          />
+        }
+      >
+        <DetailHero anime={anime} scrollY={scrollY} />
 
-          <View style={styles.section}>
-            <FactRow anime={anime} />
-            <View style={styles.actions}>
-              <View style={styles.primaryAction}>
-                <WatchlistButton anime={anime} />
-              </View>
-              {anime.trailer && <TrailerButton trailer={anime.trailer} />}
+        <View style={styles.section}>
+          <FactRow anime={anime} />
+          <View style={styles.actions}>
+            <View style={styles.primaryAction}>
+              <WatchlistButton anime={anime} />
             </View>
-            {anime.nextEpisode && (
-              <NextEpisode
-                episode={anime.nextEpisode.episode}
-                airingAt={anime.nextEpisode.airingAt}
-              />
-            )}
-            {anime.synopsis && <Synopsis text={anime.synopsis} />}
-            <InfoGrid anime={anime} />
-            {anime.genres.length > 0 && (
-              <View style={styles.block}>
-                <SectionHeader title="Genres" icon="category" inset={false} />
-                <View style={styles.wrap}>
-                  {anime.genres.map((genre) => (
-                    <Chip
-                      key={genre}
-                      label={genre}
-                      onPress={() => router.push(`/genre/${encodeURIComponent(genre)}`)}
-                    />
-                  ))}
-                </View>
-              </View>
-            )}
-            <TagList tags={anime.tags} />
+            {anime.trailer && <TrailerButton trailer={anime.trailer} />}
           </View>
-
-          {relations.length > 0 && <RelationShelf relations={relations} />}
-          {recommendations.length > 0 && (
-            <AnimeShelf title="You might also like" icon="thumb_up" items={recommendations} />
+          {anime.nextEpisode && (
+            <NextEpisode
+              episode={anime.nextEpisode.episode}
+              airingAt={anime.nextEpisode.airingAt}
+            />
           )}
-        </Animated.ScrollView>
-      </GlassBackdrop>
+          {anime.synopsis && <Synopsis text={anime.synopsis} />}
+          <InfoGrid anime={anime} />
+          {anime.genres.length > 0 && (
+            <View style={styles.block}>
+              <SectionHeader title="Genres" icon="category" inset={false} />
+              <View style={styles.wrap}>
+                {anime.genres.map((genre) => (
+                  <Chip
+                    key={genre}
+                    label={genre}
+                    onPress={() => router.push(`/genre/${encodeURIComponent(genre)}`)}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+          <TagList tags={anime.tags} />
+        </View>
+
+        {relations.length > 0 && <RelationShelf relations={relations} />}
+        {recommendations.length > 0 && (
+          <AnimeShelf title="You might also like" icon="thumb_up" items={recommendations} />
+        )}
+      </Animated.ScrollView>
       <DetailTopBar title={title} scrollY={scrollY} onShare={handleShare} />
-    </GlassScope>
+    </View>
   );
 }
 

@@ -4,7 +4,6 @@ import { RefreshControl, View } from "react-native";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 
 import type { ShelfVariant } from "@/components/anime/anime-shelf";
-import { GlassBackdrop, GlassScope } from "@/components/ui/glass";
 import { UpdateBanner } from "@/components/update-banner";
 import type { RankedListKind } from "@/constants";
 import { useRefresh } from "@/hooks/use-refresh";
@@ -43,33 +42,31 @@ export function HomeScreen() {
   });
 
   return (
-    <GlassScope>
-      <GlassBackdrop style={styles.screen}>
-        <Animated.ScrollView
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ ...styles.content, paddingBottom: bottomSpace }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[colors.accent]}
-              progressBackgroundColor={colors.surfaceRaised}
-              progressViewOffset={spacing.xxxl}
-            />
-          }
-        >
-          <SpotlightCarousel />
-          <View style={styles.banner}>
-            <UpdateBanner />
-          </View>
-          {SHELVES.map(({ kind, variant }) => (
-            <RankedShelf key={kind} kind={kind} variant={variant} />
-          ))}
-        </Animated.ScrollView>
-      </GlassBackdrop>
+    <View style={styles.screen}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ ...styles.content, paddingBottom: bottomSpace }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.accent]}
+            progressBackgroundColor={colors.surfaceRaised}
+            progressViewOffset={spacing.xxxl}
+          />
+        }
+      >
+        <SpotlightCarousel />
+        <View style={styles.banner}>
+          <UpdateBanner />
+        </View>
+        {SHELVES.map(({ kind, variant }) => (
+          <RankedShelf key={kind} kind={kind} variant={variant} />
+        ))}
+      </Animated.ScrollView>
       <HomeHeader scrollY={scrollY} solidAt={SPOTLIGHT_HEIGHT - spacing.xxxl * 2} />
-    </GlassScope>
+    </View>
   );
 }
 

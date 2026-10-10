@@ -35,8 +35,6 @@ export interface ThemeColors {
 }
 
 export interface GlassStyle {
-  tint: ColorScheme;
-  intensity: number;
   fill: string;
   /** For glass over busy artwork, where a light fill alone isn't legible. */
   fillStrong: string;
@@ -107,10 +105,8 @@ export function createTheme(scheme: ColorScheme, accentKey: AccentKey): Theme {
       shadow: "#000000",
     },
     glass: {
-      tint: scheme,
-      intensity: dark ? 60 : 70,
-      fill: dark ? "rgba(22, 22, 28, 0.55)" : "rgba(255, 255, 255, 0.62)",
-      fillStrong: dark ? "rgba(14, 14, 18, 0.78)" : "rgba(255, 255, 255, 0.82)",
+      fill: dark ? "rgba(22, 22, 28, 0.82)" : "rgba(255, 255, 255, 0.86)",
+      fillStrong: dark ? "rgba(14, 14, 18, 0.9)" : "rgba(255, 255, 255, 0.92)",
       border: dark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
     },
     statusColors: STATUS_COLORS,
