@@ -6,6 +6,7 @@ import { useTheme } from "@/providers/theme-provider";
 import { createStyles } from "@/theme/create-styles";
 
 const BlurTargetContext = createContext<RefObject<View | null> | null>(null);
+const InsideTargetContext = createContext(false);
 
 interface ChildrenProps {
   children: ReactNode;
@@ -13,7 +14,11 @@ interface ChildrenProps {
 
 export function GlassScope({ children }: ChildrenProps) {
   const targetRef = useRef<View | null>(null);
-  return <BlurTargetContext.Provider value={targetRef}>{children}</BlurTargetContext.Provider>;
+  return (
+    <BlurTargetContext.Provider value={targetRef}>
+      <InsideTargetContext.Provider value={false}>{children}</InsideTargetContext.Provider>
+    </BlurTargetContext.Provider>
+  );
 }
 
 interface GlassBackdropProps extends ChildrenProps {
@@ -26,7 +31,7 @@ export function GlassBackdrop({ children, style }: GlassBackdropProps) {
   if (!targetRef) return <View style={style}>{children}</View>;
   return (
     <BlurTargetView ref={targetRef} style={style}>
-      {children}
+      <InsideTargetContext.Provider value>{children}</InsideTargetContext.Provider>
     </BlurTargetView>
   );
 }
@@ -37,16 +42,19 @@ interface GlassViewProps extends ViewProps {
 
 /**
  * Translucent, blurred surface. Outside a GlassScope, or on Android versions without RenderNode
- * blur (before 12), it falls back to the tinted fill alone, which still reads as frosted.
+ * blur (before 12), it falls back to the tinted fill alone, which still reads as frosted. Inside
+ * the backdrop it also skips the blur: a blur view drawing the target that contains it recurses
+ * until the render thread overflows its stack.
  */
 export function GlassView({ strong = false, style, children, ...viewProps }: GlassViewProps) {
   const { glass } = useTheme();
   const styles = useStyles();
   const targetRef = useContext(BlurTargetContext);
+  const insideTarget = useContext(InsideTargetContext);
 
   return (
     <View style={[styles.container, style]} {...viewProps}>
-      {targetRef && (
+      {targetRef && !insideTarget && (
         <BlurView
           blurTarget={targetRef}
           blurMethod="dimezisBlurViewSdk31Plus"
