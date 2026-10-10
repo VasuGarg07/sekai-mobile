@@ -1,0 +1,48 @@
+# Builds the release APK on GitHub's machines and attaches it to a GitHub Release.
+# Trigger: push a tag like v1.0.0. Needs the EXPO_TOKEN repository secret
+# (expo.dev → Access tokens) so the build can use the keystore and env vars stored on EAS.
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('package-lock.json', 'app.json') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - run: npm ci
+
+      - name: Build APK
+        run: npx eas-cli@latest build --local --platform android --profile production --non-interactive --output sekai-${{ github.ref_name }}.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: sekai-${{ github.ref_name }}.apk
+          generate_release_notes: true

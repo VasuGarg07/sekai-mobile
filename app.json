@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "sekai-mobile",
+    "name": "Sekai",
     "slug": "sekai-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "sekaimobile",
+    "scheme": "sekai",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.vasugarg.sekai"
     },
     "web": {
       "output": "static",
@@ -37,6 +38,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7137cd66-b3dc-4cb9-860d-67da4ad95f93"
+      }
+    },
+    "owner": "vasu-garg-labs"
   }
 }

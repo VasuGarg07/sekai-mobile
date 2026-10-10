@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "534725842657",
+    "project_id": "sekai-arcadia",
+    "storage_bucket": "sekai-arcadia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534725842657:android:42fee2ef04424c9f8ec9a0",
+        "android_client_info": {
+          "package_name": "com.vasugarg.sekai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "534725842657-ktjir7c1nvpodi64jbc3o204ffqilmhv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vasugarg.sekai",
+            "certificate_hash": "b397b1077dda5a4da5962a1f4e7fc673fdef2eda"
+          }
+        },
+        {
+          "client_id": "534725842657-85i0tilojmnp73rg0m812bpch0uscbrf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL42HezPiCu8UaclY-Ab9vIpPtfWcQySQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "534725842657-85i0tilojmnp73rg0m812bpch0uscbrf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
