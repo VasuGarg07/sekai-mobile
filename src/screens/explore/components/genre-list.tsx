@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 
+import { GenreIcon } from "@/components/icons/genre-icon";
 import { AppText } from "@/components/ui/app-text";
-import { Icon } from "@/components/ui/icon";
 import { ErrorState } from "@/components/ui/screen-state";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +11,7 @@ import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useTheme } from "@/providers/theme-provider";
 import { contrastText, iconSize, radius, spacing, withAlpha } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
-import { getGenreIcon, getGenreTint } from "@/utils/genres";
+import { getGenreTint } from "@/utils/genres";
 
 const TILE_HEIGHT = 72;
 const PLACEHOLDERS = Array.from({ length: 12 }, (_, id) => id);
@@ -36,7 +36,7 @@ export function GenreList() {
                 <Skeleton height={TILE_HEIGHT} rounded={radius.lg} />
               </View>
             ))
-          : data.map((genre) => <GenreTile key={genre} genre={genre} />)}
+          : data.map((genre, index) => <GenreTile key={genre} genre={genre} index={index} />)}
       </View>
     </ScrollView>
   );
@@ -44,12 +44,13 @@ export function GenreList() {
 
 interface GenreTileProps {
   genre: string;
+  index: number;
 }
 
-function GenreTile({ genre }: GenreTileProps) {
+function GenreTile({ genre, index }: GenreTileProps) {
   const { tints } = useTheme();
   const styles = useStyles();
-  const color = tints[getGenreTint(genre)];
+  const color = tints[getGenreTint(index)];
 
   return (
     <View style={styles.cell}>
@@ -64,7 +65,7 @@ function GenreTile({ genre }: GenreTileProps) {
         ]}
       >
         <View style={[styles.iconCircle, { backgroundColor: color }]}>
-          <Icon name={getGenreIcon(genre)} size={iconSize.md} color={contrastText(color)} />
+          <GenreIcon genre={genre} size={iconSize.md} color={contrastText(color)} />
         </View>
         <AppText variant="bodyStrong" numberOfLines={1} style={styles.label}>
           {genre}

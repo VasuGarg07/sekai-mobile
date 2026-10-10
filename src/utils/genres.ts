@@ -1,36 +1,11 @@
-import type { IconName } from "@/components/ui/icon";
 import type { TintName } from "@/theme";
-
-const GENRE_ICONS: Record<string, IconName> = {
-  action: "bolt",
-  adventure: "hiking",
-  comedy: "sentiment_very_satisfied",
-  drama: "theater_comedy",
-  ecchi: "favorite_border",
-  fantasy: "castle",
-  hentai: "explicit",
-  horror: "mood_bad",
-  "mahou shoujo": "auto_awesome",
-  mecha: "smart_toy",
-  music: "music_note",
-  mystery: "search",
-  psychological: "psychology",
-  romance: "favorite",
-  "sci-fi": "rocket_launch",
-  "slice of life": "local_cafe",
-  sports: "sports_soccer",
-  supernatural: "nightlight",
-  thriller: "sports_martial_arts",
-};
 
 const GENRE_TINTS: TintName[] = ["red", "blue", "violet", "green", "amber", "pink", "indigo", "yellow"];
 
-export function getGenreIcon(genre: string): IconName {
-  return GENRE_ICONS[genre.toLowerCase()] ?? "category";
-}
-
-/** Stable tint per genre name, so a genre keeps its color everywhere. */
-export function getGenreTint(genre: string): TintName {
-  const hash = [...genre].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return GENRE_TINTS[hash % GENRE_TINTS.length];
+/**
+ * Tint by grid position. The grid has two columns, so neighbours differ by 1 (side by side) or 2
+ * (stacked) positions, and both are distinct modulo the palette size.
+ */
+export function getGenreTint(index: number): TintName {
+  return GENRE_TINTS[index % GENRE_TINTS.length];
 }
