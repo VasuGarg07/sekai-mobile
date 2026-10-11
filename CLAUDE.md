@@ -12,11 +12,27 @@ Conventions below follow the Google TypeScript Style Guide, the Airbnb React/JSX
   - `npm install <package>`; if the package has native code, say that a rebuild is needed
   - `npm run android` (debug build, install, launch)
   - `npm start -- --reset-cache` after changing Babel, Metro or `.env`
-  - release build: see "Local signed build" in `README.md`
+  - release build: see "Release" below
 - Never commit, push or create branches unless the user explicitly asks in that turn.
 - Don't edit `android/` or other native config while the user has a build running.
 - `android/` is committed source. Edit it only when a task needs native configuration (manifest, Gradle, resources) and say which native file changed so the user knows to rebuild. Never edit build output (`android/app/build/`, `android/.gradle/`).
 - Library APIs change between versions. Check the docs for the installed version: React Navigation 7 (https://reactnavigation.org/docs/getting-started), React Native (https://reactnative.dev/docs/getting-started), and each native library's README in `node_modules`, instead of relying on memory.
+
+## Release
+
+- Pushing a tag like `v1.2.0` runs `.github/workflows/release.yml`: a signed arm64 APK is attached to a GitHub Release. The tag is the `versionName`; `versionCode` is the `VERSION_CODE_BASE` repository variable plus the run number. The secrets the workflow needs are listed at the top of that file.
+- The release keystore and its passwords never go in the repo. If the key is lost, installed copies can no longer be updated.
+- Local signed build, from `android/` in one shell (use a `versionCode` above any installed build):
+
+  ```cmd
+  set SEKAI_UPLOAD_STORE_FILE=<absolute path to the .jks>
+  set SEKAI_UPLOAD_KEY_ALIAS=<key alias>
+  set /p SEKAI_UPLOAD_STORE_PASSWORD=Store password:
+  set /p SEKAI_UPLOAD_KEY_PASSWORD=Key password:
+  gradlew assembleRelease -PappVersionName=1.0.0 -PappVersionCode=<n> -PreactNativeArchitectures=arm64-v8a
+  ```
+
+- The APK is `android/app/build/outputs/apk/release/app-release.apk`. Check its signing key with `apksigner verify --print-certs <apk>` from the Android SDK `build-tools` folder; `keytool -printcert -jarfile` fails because `minSdk` 24 means no v1 signature.
 
 ## Structure
 
