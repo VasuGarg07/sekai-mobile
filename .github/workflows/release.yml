@@ -1,12 +1,22 @@
-# Builds the release APK on GitHub's machines and attaches it to a GitHub Release.
-# Trigger: push a tag like v1.0.0. Needs the EXPO_TOKEN repository secret
-# (expo.dev → Access tokens) so the build can use the keystore and env vars stored on EAS.
+# Builds the signed release APK on GitHub's machines and attaches it to a GitHub Release.
+# Trigger: push a tag like v1.0.0. Pushes to the migration branch and manual runs ("Run workflow") build a test APK
+# as an artifact; nothing is published.
+# Needs these repository secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+# ANDROID_KEY_PASSWORD, ENV_FILE (the contents of the .env file); and the repository variable VERSION_CODE_BASE.
 name: Release APK
 
 on:
   push:
     tags:
       - "v*"
+    # Temporary: lets the first dry run happen before this file is on the default branch. Remove after merging.
+    branches:
+      - bare-rn-migration
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version name for the test build (no release is published)"
+        default: "0.0.0"
 
 permissions:
   contents: write
@@ -14,6 +24,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.version || '0.0.0' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,17 +44,48 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('package-lock.json', 'app.json') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('package-lock.json', 'android/**/*.gradle*', 'android/gradle.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
       - run: npm ci
 
-      - name: Build APK
-        run: npx eas-cli@latest build --local --platform android --profile production --non-interactive --output sekai-${{ github.ref_name }}.apk
+      - name: Write .env
+        run: printf '%s' "$ENV_FILE" > .env
         env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+
+      - name: Restore signing key
+        run: printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          # Without the base, bash would read the missing variable as 0 and ship a versionCode Android refuses to install over.
+          : "${VERSION_CODE_BASE:?Set the VERSION_CODE_BASE repository variable}"
+          chmod +x gradlew
+          VERSION_NUMBER="${VERSION_NAME#v}"
+          ./gradlew assembleRelease \
+            -PappVersionName="$VERSION_NUMBER" \
+            -PappVersionCode="$((VERSION_CODE_BASE + GITHUB_RUN_NUMBER))" \
+            -PreactNativeArchitectures=arm64-v8a
+          cp app/build/outputs/apk/release/app-release.apk "../sekai-v${VERSION_NUMBER}.apk"
+        env:
+          VERSION_CODE_BASE: ${{ vars.VERSION_CODE_BASE }}
+          SEKAI_UPLOAD_STORE_FILE: ${{ runner.temp }}/release.jks
+          SEKAI_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SEKAI_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SEKAI_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: sekai-${{ github.ref_name }}.apk
+          files: sekai-v*.apk
           generate_release_notes: true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: sekai-test-apk
+          path: sekai-v*.apk
