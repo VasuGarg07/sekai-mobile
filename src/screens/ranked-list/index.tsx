@@ -16,7 +16,7 @@ export function RankedListScreen({ kind }: RankedListScreenProps) {
   const styles = useStyles();
   const { bottom } = useSafeAreaInsets();
   const { title, sort, status } = RANKED_LISTS[kind];
-  const query = useAnimeList(sort, status);
+  const query = useAnimeList(sort, status, undefined, { seedFromShelf: true });
 
   return (
     <View style={styles.screen}>

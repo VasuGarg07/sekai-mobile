@@ -4,6 +4,7 @@ import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { IconButton } from "@/components/ui/icon-button";
+import { prefetchAnimeDetail } from "@/hooks/use-anime";
 import { POSTER_ASPECT_RATIO, getTextHeight, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { WatchlistItem } from "@/types/watchlist";
@@ -32,11 +33,18 @@ export function WatchlistRow({ item }: WatchlistItemProps) {
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${WATCH_STATUS_LABELS[item.watchStatus]}`}
       accessibilityHint="Long press to change the status"
+      onPressIn={() => prefetchAnimeDetail(item.id)}
       onPress={() => router.push(`/anime/${item.id}`)}
       onLongPress={() => openStatusSheet(item)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <Image source={item.coverImage} style={styles.cover} contentFit="cover" transition={200} />
+      <Image
+        source={item.coverImage}
+        recyclingKey={String(item.id)}
+        style={styles.cover}
+        contentFit="cover"
+        transition={150}
+      />
       <View style={styles.body}>
         <AppText variant="bodyStrong" numberOfLines={2} style={styles.rowTitle}>
           {title}
@@ -64,11 +72,18 @@ export function WatchlistGridCard({ item }: WatchlistItemProps) {
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${WATCH_STATUS_LABELS[item.watchStatus]}`}
       accessibilityHint="Long press to change the status"
+      onPressIn={() => prefetchAnimeDetail(item.id)}
       onPress={() => router.push(`/anime/${item.id}`)}
       onLongPress={() => openStatusSheet(item)}
       style={({ pressed }) => [styles.gridCard, pressed && styles.pressed]}
     >
-      <Image source={item.coverImage} style={styles.gridCover} contentFit="cover" transition={200} />
+      <Image
+        source={item.coverImage}
+        recyclingKey={String(item.id)}
+        style={styles.gridCover}
+        contentFit="cover"
+        transition={150}
+      />
       <AppText variant="label" numberOfLines={2} style={styles.gridTitle}>
         {title}
       </AppText>

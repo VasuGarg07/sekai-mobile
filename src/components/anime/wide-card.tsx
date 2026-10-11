@@ -4,12 +4,11 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
-import { Badge } from "@/components/ui/badge";
-import { useTheme } from "@/providers/theme-provider";
+import { prefetchAnimeDetail } from "@/hooks/use-anime";
 import { BANNER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
-import { formatEnum, getTitle } from "@/utils/anime";
+import { getTitle } from "@/utils/anime";
 
 export const WIDE_CARD_WIDTH = 280;
 
@@ -19,17 +18,23 @@ interface WideCardProps {
 
 export function WideCard({ anime }: WideCardProps) {
   const styles = useStyles();
-  const { colors } = useTheme();
   const title = getTitle(anime);
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
+      onPressIn={() => prefetchAnimeDetail(anime.id)}
       onPress={() => router.push(`/anime/${anime.id}`)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <Image source={anime.bannerImage ?? anime.coverImage} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
+      <Image
+        source={anime.bannerImage ?? anime.coverImage}
+        recyclingKey={String(anime.id)}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        transition={150}
+      />
       <LinearGradient
         colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.85)"]}
         locations={[0.35, 1]}

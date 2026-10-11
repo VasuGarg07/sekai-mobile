@@ -4,6 +4,7 @@ import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Badge } from "@/components/ui/badge";
+import { prefetchAnimeDetail } from "@/hooks/use-anime";
 import { useTheme } from "@/providers/theme-provider";
 import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -24,11 +25,18 @@ export function PosterCard({ anime, width }: PosterCardProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
+      onPressIn={() => prefetchAnimeDetail(anime.id)}
       onPress={() => router.push(`/anime/${anime.id}`)}
       style={({ pressed }) => [styles.card, width !== undefined && { width }, pressed && styles.pressed]}
     >
       <View>
-        <Image source={anime.coverImage} style={styles.poster} contentFit="cover" transition={200} />
+        <Image
+          source={anime.coverImage}
+          recyclingKey={String(anime.id)}
+          style={styles.poster}
+          contentFit="cover"
+          transition={150}
+        />
         {anime.averageScore !== null && (
           <View style={styles.badge}>
             <Badge

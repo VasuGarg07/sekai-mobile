@@ -10,7 +10,13 @@ import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
 
 const COLUMNS = 3;
+// Renders about a screen and a half beyond the viewport, so fast flings don't outrun the rows.
+const DRAW_DISTANCE = 800;
+// Starts the next page two screens before the end, so the list never reaches blank space.
+const END_REACHED_THRESHOLD = 2;
 const PLACEHOLDERS = Array.from({ length: 12 }, (_, id) => id);
+
+const keyExtractor = (item: AnimeListItem) => String(item.id);
 
 interface AnimeGridProps {
   items: AnimeListItem[];
@@ -40,14 +46,15 @@ export function AnimeGrid({
     <FlashList
       data={items}
       numColumns={COLUMNS}
-      keyExtractor={(item) => String(item.id)}
+      keyExtractor={keyExtractor}
       renderItem={({ item }) => (
         <View style={styles.cell}>
           <PosterCard anime={item} />
         </View>
       )}
+      drawDistance={DRAW_DISTANCE}
       onEndReached={onEndReached}
-      onEndReachedThreshold={0.5}
+      onEndReachedThreshold={END_REACHED_THRESHOLD}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
