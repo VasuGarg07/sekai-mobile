@@ -13,7 +13,6 @@ import {
   updateDoc,
   writeBatch,
   type DocumentSnapshot,
-  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 
 import { MAX_WATCHLIST_SIZE } from "@/constants";
@@ -49,7 +48,8 @@ interface LegacySnapshotFields {
 
 type StoredEntry = WatchlistEntryDoc & LegacySnapshotFields;
 
-export type WatchlistCursor = QueryDocumentSnapshot;
+/** `addedAt` of the last entry on the previous page. A plain number, so pages survive JSON caching. */
+export type WatchlistCursor = number;
 
 export interface WatchlistPage {
   items: WatchlistItem[];
@@ -79,7 +79,7 @@ export async function fetchWatchlistPage(
   const { items, refreshFailed } = await hydrate(docs.map(readEntry));
   return {
     items,
-    nextCursor: docs.length === PAGE_SIZE ? docs[docs.length - 1] : null,
+    nextCursor: docs.length === PAGE_SIZE ? readEntry(docs[docs.length - 1]).addedAt : null,
     refreshFailed,
   };
 }
@@ -93,10 +93,9 @@ export async function fetchEntireWatchlist(
 }
 
 /** One document read, so "is it saved?" works for anime not loaded in the list yet. */
-export async function fetchWatchlistIds(uid: string): Promise<Set<number>> {
+export async function fetchWatchlistIds(uid: string): Promise<number[]> {
   const snapshot = await getDoc(idsRef(uid));
-  const ids: number[] = snapshot.exists() ? (snapshot.data().ids ?? []) : [];
-  return new Set(ids);
+  return snapshot.exists() ? (snapshot.data().ids ?? []) : [];
 }
 
 /** The saved status, or null when the anime isn't in the watchlist. */
