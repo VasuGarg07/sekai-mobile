@@ -1,11 +1,11 @@
-import { QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, type ComponentProps } from "react";
 
-import { queryClient } from "@/lib/query-client";
+import { useSessionPrefetch } from "@/hooks/use-session-prefetch";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
 import { ExploreFiltersProvider } from "@/providers/explore-filters-provider";
+import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider, useTheme } from "@/providers/theme-provider";
 import { radius } from "@/theme";
 
@@ -18,13 +18,13 @@ type StackOptions = ComponentProps<typeof Stack>["screenOptions"];
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
+      <QueryProvider>
         <AuthProvider>
           <ExploreFiltersProvider>
             <AppNavigator />
           </ExploreFiltersProvider>
         </AuthProvider>
-      </QueryClientProvider>
+      </QueryProvider>
     </ThemeProvider>
   );
 }
@@ -32,6 +32,7 @@ export default function RootLayout() {
 function AppNavigator() {
   const theme = useTheme();
   const { initialized } = useAuth();
+  useSessionPrefetch();
   // Until Firebase restores the saved session, screens would render as signed out.
   useEffect(() => {
     if (initialized) SplashScreen.hideAsync();

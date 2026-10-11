@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { onAuthStateChanged, reload, type User } from "firebase/auth";
 import {
   createContext,
@@ -41,6 +42,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<SekaiUser | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(
     () =>
@@ -51,9 +53,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           registerProfile(firebaseUser).catch((error) =>
             console.warn("Couldn't register profile:", error),
           );
+        } else {
+          // Cached per-user data is persisted to disk, so it must not outlive the session.
+          queryClient.removeQueries({ queryKey: ["watchlist"] });
+          queryClient.removeQueries({ queryKey: ["preferences"] });
         }
       }),
-    [],
+    [queryClient],
   );
 
   const refreshUser = useCallback(async () => {
