@@ -42,9 +42,7 @@ function toAnimeRelation({ relationType, node }: AniListRelationEdge): AnimeRela
     relationType,
     titleEnglish: node.title?.english ?? null,
     titleRomaji: node.title?.romaji ?? null,
-    coverImage: node.coverImage?.extraLarge ?? node.coverImage?.large ?? null,
-    format: node.format ?? null,
-    status: node.status ?? null,
+    coverImage: node.coverImage?.large ?? null,
     isAdult: node.isAdult ?? false,
   };
 }

@@ -2,12 +2,15 @@ import type { AnimeSearchFilters } from "@/types/anime";
 import type { Season } from "@/utils/date";
 
 export const queryKeys = {
-  animeList: (sort: string[], status: string | undefined, perPage: number, adultMode: boolean) =>
-    ["anime", "list", { sort, status, perPage, adultMode }] as const,
+  animeList: (
+    sort: string[],
+    status: string | undefined,
+    perPage: number,
+    adultMode: boolean,
+    withBanner: boolean,
+  ) => ["anime", "list", { sort, status, perPage, adultMode, withBanner }] as const,
   animeSearch: (filters: AnimeSearchFilters, adultMode: boolean) =>
     ["anime", "search", { filters, adultMode }] as const,
-  quickSearch: (search: string, adultMode: boolean) =>
-    ["anime", "quick-search", { search, adultMode }] as const,
   spotlight: (season: Season, year: number, adultMode: boolean) =>
     ["anime", "spotlight", { season, year, adultMode }] as const,
   animeDetail: (id: number) => ["anime", "detail", id] as const,

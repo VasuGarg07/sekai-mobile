@@ -25,7 +25,6 @@ export type AnimeSpotlight = AnimeListItem;
 
 export interface AnimeTag {
   name: string;
-  description: string | null;
   rank: number | null;
   isGeneralSpoiler: boolean;
   isMediaSpoiler: boolean;
@@ -37,15 +36,12 @@ export interface AnimeRelation {
   titleEnglish: string | null;
   titleRomaji: string | null;
   coverImage: string | null;
-  format: string | null;
-  status: string | null;
   isAdult: boolean;
 }
 
 export interface AnimeTrailer {
   id: string;
   site: string;
-  thumbnail: string;
 }
 
 export interface AnimeDetail extends AnimeListItem {

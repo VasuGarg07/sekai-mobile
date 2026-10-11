@@ -17,14 +17,12 @@ import {
   fetchGenres,
   fetchSpotlight,
   isAdultGenre,
-  quickSearchAnime,
   searchAnime,
 } from "@/services/anilist/anime";
-import type { AnimeDetail, AnimeListItem, AnimePage, AnimeSearchFilters } from "@/types/anime";
+import type { AnimePage, AnimeSearchFilters } from "@/types/anime";
 import { getCurrentSeason } from "@/utils/date";
 
 const DEFAULT_PAGE_SIZE = 30;
-const QUICK_SEARCH_MIN_LENGTH = 3;
 const DETAIL_STALE_TIME = 30 * 60 * 1000;
 
 const getNextPage = (page: AnimePage) => (page.hasNextPage ? page.currentPage + 1 : undefined);
@@ -32,20 +30,22 @@ const getNextPage = (page: AnimePage) => (page.hasNextPage ? page.currentPage + 
 interface ListOptions {
   /** Show the home shelf's items while the full list loads, so "See all" opens with content. */
   seedFromShelf?: boolean;
+  /** For wide cards, which also draw the banner and genres. */
+  withBanner?: boolean;
 }
 
 export function useAnimeList(
   sort: string[],
   status?: string,
   perPage = DEFAULT_PAGE_SIZE,
-  { seedFromShelf = false }: ListOptions = {},
+  { seedFromShelf = false, withBanner = false }: ListOptions = {},
 ) {
   const { adultMode, ready } = useAnimeScope();
   const client = useQueryClient();
   return useInfiniteQuery({
-    queryKey: queryKeys.animeList(sort, status, perPage, adultMode),
+    queryKey: queryKeys.animeList(sort, status, perPage, adultMode, withBanner),
     queryFn: ({ pageParam }) =>
-      fetchAnimeList({ sort, status, page: pageParam, perPage, adultMode }),
+      fetchAnimeList({ sort, status, page: pageParam, perPage, adultMode, withBanner }),
     initialPageParam: 1,
     getNextPageParam: getNextPage,
     enabled: ready,
@@ -88,19 +88,6 @@ export function useAnimeSearch(filters: AnimeSearchFilters, perPage = DEFAULT_PA
   });
 }
 
-/** Runs once the search has at least three characters. */
-export function useQuickSearch(search: string) {
-  const { adultMode, ready } = useAnimeScope();
-  const term = search.trim();
-  return useQuery({
-    queryKey: queryKeys.quickSearch(term, adultMode),
-    queryFn:
-      ready && term.length >= QUICK_SEARCH_MIN_LENGTH
-        ? () => quickSearchAnime(term, adultMode)
-        : skipToken,
-  });
-}
-
 /** The current season's most popular titles. */
 export function useSpotlight() {
   const { adultMode, ready } = useAnimeScope();
@@ -126,42 +113,8 @@ export function prefetchAnimeDetail(id: number) {
   void queryClient.prefetchQuery(detailQueryOptions(id));
 }
 
-function findListItem(client: QueryClient, id: number): AnimeListItem | undefined {
-  for (const [, data] of client.getQueriesData<unknown>({ queryKey: ["anime"] })) {
-    const items = Array.isArray(data)
-      ? data
-      : (data as Partial<InfiniteData<AnimePage>> | undefined)?.pages?.flatMap((page) => page.items);
-    const match = items?.find((item): item is AnimeListItem => item?.id === id);
-    if (match) return match;
-  }
-  return undefined;
-}
-
-function toPlaceholderDetail(item: AnimeListItem): AnimeDetail {
-  return {
-    ...item,
-    coverImageExtraLarge: item.coverImage,
-    countryOfOrigin: null,
-    tags: [],
-    popularity: null,
-    favourites: null,
-    relations: [],
-    recommendations: [],
-    trailer: null,
-    nextEpisode: null,
-  };
-}
-
-/** Opens with whatever a list already loaded about the anime, then fills in the rest. */
 export function useAnimeDetail(id: number) {
-  const client = useQueryClient();
-  return useQuery({
-    ...detailQueryOptions(id),
-    placeholderData: () => {
-      const item = findListItem(client, id);
-      return item ? toPlaceholderDetail(item) : undefined;
-    },
-  });
+  return useQuery(detailQueryOptions(id));
 }
 
 /** Adult-only genres are hidden unless 18+ Mode is on. */

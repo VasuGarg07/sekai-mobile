@@ -16,8 +16,6 @@ export interface AniListRelationEdge {
     id: number;
     title?: AniListTitle | null;
     coverImage?: AniListCoverImage | null;
-    format?: string | null;
-    status?: string | null;
     isAdult?: boolean | null;
   };
 }
@@ -43,7 +41,6 @@ export interface AniListMedia {
   tags?:
     | {
         name: string;
-        description: string | null;
         rank: number | null;
         isGeneralSpoiler: boolean;
         isMediaSpoiler: boolean;
@@ -55,7 +52,7 @@ export interface AniListMedia {
   recommendations?: {
     edges?: { node?: { mediaRecommendation?: AniListMedia | null } | null }[] | null;
   } | null;
-  trailer?: { id: string; site: string; thumbnail: string } | null;
+  trailer?: { id: string; site: string } | null;
   nextAiringEpisode?: { episode: number; airingAt: number } | null;
 }
 

@@ -89,7 +89,7 @@ export async function fetchEntireWatchlist(
   uid: string,
 ): Promise<{ items: WatchlistItem[]; refreshFailed: boolean }> {
   const { docs } = await getDocs(query(entriesRef(uid), orderBy("addedAt", "desc")));
-  return hydrate(docs.map(readEntry));
+  return hydrate(docs.map(readEntry), { forExport: true });
 }
 
 /** One document read, so "is it saved?" works for anime not loaded in the list yet. */
@@ -176,11 +176,15 @@ function getTitle(anime: Pick<AnimeListItem, "titleEnglish" | "titleRomaji">): s
 
 async function hydrate(
   entries: StoredEntry[],
+  options: { forExport?: boolean } = {},
 ): Promise<{ items: WatchlistItem[]; refreshFailed: boolean }> {
   if (entries.length === 0) return { items: [], refreshFailed: false };
 
   try {
-    const fresh = await fetchAnimeByIds(entries.map((entry) => entry.id));
+    const fresh = await fetchAnimeByIds(
+      entries.map((entry) => entry.id),
+      options,
+    );
     const items = entries.map((entry) => toWatchlistItem(entry, fresh.get(entry.id)));
     return { items, refreshFailed: false };
   } catch (error) {

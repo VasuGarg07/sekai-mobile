@@ -10,7 +10,7 @@ import { AppState } from "react-native";
 
 const STORAGE_KEY = "query-cache";
 // Bump when a persisted query's data shape changes, so old caches are dropped instead of misread.
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const SAVE_DELAY_MS = 2_000;
 const MAX_PERSISTED_PAGES = 2;

@@ -17,7 +17,12 @@ interface RankedShelfProps {
 
 export function RankedShelf({ kind, variant = "poster" }: RankedShelfProps) {
   const { title, icon, sort, status } = RANKED_LISTS[kind];
-  const { data, isPending, isError, refetch } = useAnimeList(sort, status, SHELF_SIZES[variant]);
+  const { data, isPending, isError, refetch } = useAnimeList(
+    sort,
+    status,
+    SHELF_SIZES[variant],
+    { withBanner: variant === "wide" },
+  );
 
   return (
     <AnimeShelf

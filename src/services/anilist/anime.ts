@@ -8,7 +8,7 @@ import type {
 import type { Season } from "@/utils/date";
 
 import { AniListError, queryAniList } from "./client";
-import { adultFilter, MEDIA_LIST_FIELDS } from "./fields";
+import { adultFilter, BANNER_FIELDS, CARD_FIELDS, DETAIL_FIELDS, EXPORT_FIELDS } from "./fields";
 import { toAnimeDetail, toAnimeListItem, toAnimePage, toAnimeSpotlight } from "./mappers";
 import type { GenreCollectionResponse, MediaPageResponse, MediaResponse } from "./types";
 
@@ -16,16 +16,19 @@ const PAGE_INFO_FIELDS = /* GraphQL */ `
   pageInfo { total currentPage hasNextPage }
 `;
 
-const LIST_QUERY = /* GraphQL */ `
+const listQuery = (fields: string) => /* GraphQL */ `
   query ($page: Int, $perPage: Int, $sort: [MediaSort], $status: MediaStatus, $isAdult: Boolean) {
     Page(page: $page, perPage: $perPage) {
       ${PAGE_INFO_FIELDS}
       media(type: ANIME, sort: $sort, status: $status, isAdult: $isAdult) {
-        ${MEDIA_LIST_FIELDS}
+        ${fields}
       }
     }
   }
 `;
+
+const LIST_QUERY = listQuery(CARD_FIELDS);
+const LIST_WITH_BANNER_QUERY = listQuery(`${CARD_FIELDS}${BANNER_FIELDS}`);
 
 const SEARCH_QUERY = /* GraphQL */ `
   query (
@@ -57,7 +60,7 @@ const SEARCH_QUERY = /* GraphQL */ `
         sort: $sort
         isAdult: $isAdult
       ) {
-        ${MEDIA_LIST_FIELDS}
+        ${CARD_FIELDS}
       }
     }
   }
@@ -67,7 +70,8 @@ const SPOTLIGHT_QUERY = /* GraphQL */ `
   query ($season: MediaSeason, $seasonYear: Int, $perPage: Int, $isAdult: Boolean) {
     Page(perPage: $perPage) {
       media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: [POPULARITY_DESC], isAdult: $isAdult) {
-        ${MEDIA_LIST_FIELDS}
+        ${CARD_FIELDS}
+        ${BANNER_FIELDS}
       }
     }
   }
@@ -76,10 +80,11 @@ const SPOTLIGHT_QUERY = /* GraphQL */ `
 const DETAIL_QUERY = /* GraphQL */ `
   query ($id: Int) {
     Media(id: $id, type: ANIME) {
-      ${MEDIA_LIST_FIELDS}
+      ${CARD_FIELDS}
+      ${DETAIL_FIELDS}
       coverImage { extraLarge large }
       countryOfOrigin
-      tags { name description rank isGeneralSpoiler isMediaSpoiler }
+      tags { name rank isGeneralSpoiler isMediaSpoiler }
       popularity
       favourites
       relations {
@@ -88,31 +93,32 @@ const DETAIL_QUERY = /* GraphQL */ `
           node {
             id
             title { romaji english }
-            coverImage { extraLarge large }
-            format
-            status
+            coverImage { large }
             isAdult
           }
         }
       }
       recommendations(perPage: 24, sort: RATING_DESC) {
-        edges { node { mediaRecommendation { ${MEDIA_LIST_FIELDS} } } }
+        edges { node { mediaRecommendation { ${CARD_FIELDS} isAdult } } }
       }
-      trailer { id site thumbnail }
+      trailer { id site }
       nextAiringEpisode { airingAt episode }
     }
   }
 `;
 
-const BY_IDS_QUERY = /* GraphQL */ `
+const byIdsQuery = (fields: string) => /* GraphQL */ `
   query ($ids: [Int], $perPage: Int) {
     Page(page: 1, perPage: $perPage) {
       media(type: ANIME, id_in: $ids) {
-        ${MEDIA_LIST_FIELDS}
+        ${fields}
       }
     }
   }
 `;
+
+const BY_IDS_QUERY = byIdsQuery(CARD_FIELDS);
+const BY_IDS_FOR_EXPORT_QUERY = byIdsQuery(`${CARD_FIELDS}${EXPORT_FIELDS}`);
 
 const GENRES_QUERY = /* GraphQL */ `
   query {
@@ -132,10 +138,16 @@ interface ListParams {
   page: number;
   perPage: number;
   adultMode: boolean;
+  /** Wide cards also draw the banner and genres. */
+  withBanner?: boolean;
 }
 
-export async function fetchAnimeList({ adultMode, ...params }: ListParams): Promise<AnimePage> {
-  const data = await queryAniList<MediaPageResponse>(LIST_QUERY, {
+export async function fetchAnimeList({
+  adultMode,
+  withBanner = false,
+  ...params
+}: ListParams): Promise<AnimePage> {
+  const data = await queryAniList<MediaPageResponse>(withBanner ? LIST_WITH_BANNER_QUERY : LIST_QUERY, {
     ...params,
     isAdult: adultFilter(adultMode),
   });
@@ -162,21 +174,6 @@ export async function searchAnime({
     isAdult: adultFilter(adultMode),
   });
   return toAnimePage(data);
-}
-
-const QUICK_SEARCH_LIMIT = 5;
-
-export async function quickSearchAnime(
-  search: string,
-  adultMode: boolean,
-): Promise<AnimeListItem[]> {
-  const page = await searchAnime({
-    filters: { search, sort: ["POPULARITY_DESC"] },
-    page: 1,
-    perPage: QUICK_SEARCH_LIMIT,
-    adultMode,
-  });
-  return page.items;
 }
 
 const SPOTLIGHT_SIZE = 10;
@@ -214,10 +211,10 @@ const RATE_LIMIT_WAITS_MS = [5_000, 15_000, 30_000];
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function fetchBatch(ids: number[]): Promise<MediaPageResponse> {
+async function fetchBatch(ids: number[], query: string): Promise<MediaPageResponse> {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await queryAniList<MediaPageResponse>(BY_IDS_QUERY, { ids, perPage: BATCH_SIZE });
+      return await queryAniList<MediaPageResponse>(query, { ids, perPage: BATCH_SIZE });
     } catch (error) {
       const delay = RATE_LIMIT_WAITS_MS[attempt];
       const rateLimited = error instanceof AniListError && error.isRateLimited;
@@ -228,13 +225,17 @@ async function fetchBatch(ids: number[]): Promise<MediaPageResponse> {
 }
 
 /** IDs AniList no longer knows are simply missing from the result. */
-export async function fetchAnimeByIds(ids: number[]): Promise<Map<number, AnimeListItem>> {
+export async function fetchAnimeByIds(
+  ids: number[],
+  { forExport = false }: { forExport?: boolean } = {},
+): Promise<Map<number, AnimeListItem>> {
+  const query = forExport ? BY_IDS_FOR_EXPORT_QUERY : BY_IDS_QUERY;
   const unique = [...new Set(ids)];
   const result = new Map<number, AnimeListItem>();
 
   for (let start = 0; start < unique.length; start += BATCH_SIZE) {
     if (start > 0) await wait(BATCH_DELAY_MS);
-    const data = await fetchBatch(unique.slice(start, start + BATCH_SIZE));
+    const data = await fetchBatch(unique.slice(start, start + BATCH_SIZE), query);
     for (const media of data.Page.media) {
       result.set(media.id, toAnimeListItem(media));
     }
