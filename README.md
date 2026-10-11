@@ -4,6 +4,11 @@ Android app for Sekai Arcadia (anime discovery + watchlist). Bare React Native 0
 React Navigation, TypeScript, Firebase JS SDK, TanStack Query. It shares one Firebase project with
 `../sekai-web`.
 
+## Download
+
+Get the latest APK from the [Releases page](https://github.com/VasuGarg07/sekai-mobile/releases/latest). On the phone, open the
+downloaded file and allow installs from that browser when Android asks. New versions install over the old one.
+
 ## Requirements
 
 - Node 24.13.0, JDK 17, Android SDK (`ANDROID_HOME` set), a USB-debugging phone or an emulator.
