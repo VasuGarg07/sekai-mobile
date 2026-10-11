@@ -18,7 +18,7 @@ import {
   type User,
 } from "firebase/auth";
 
-import googleServices from "../../google-services.json";
+import googleServices from "../../android/app/google-services.json";
 import { WEB_APP_URL } from "@/constants";
 import { fireAuth } from "@/lib/firebase";
 import { registerProfile } from "@/services/profile";
