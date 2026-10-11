@@ -27,7 +27,6 @@ import type { AnimeListItem } from "@/types/anime";
 import type { ActionResult } from "@/types/result";
 import type { WatchlistItem, WatchStatus } from "@/types/watchlist";
 
-const EMPTY_IDS = new Set<number>();
 const SIGNED_OUT: ActionResult = {
   success: false,
   message: "Sign in to manage your watchlist.",
@@ -57,16 +56,6 @@ export function useWatchlist() {
   const refreshFailed = pages?.some((page) => page.refreshFailed) ?? false;
 
   return { ...query, items, refreshFailed };
-}
-
-/** Every saved anime ID, including ones not loaded in the list. Empty when signed out. */
-export function useWatchlistIds(): Set<number> {
-  const { user } = useAuth();
-  const { data } = useQuery({
-    ...watchlistIdsQueryOptions(user?.uid),
-    select: (ids) => new Set(ids),
-  });
-  return data ?? EMPTY_IDS;
 }
 
 /** What the loaded list or the saved IDs already say, so most lookups need no Firestore read. */

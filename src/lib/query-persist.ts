@@ -106,7 +106,3 @@ export function startQueryCachePersistence(client: QueryClient): () => void {
     appState.remove();
   };
 }
-
-export async function clearPersistedQueryCache(): Promise<void> {
-  await AsyncStorage.removeItem(STORAGE_KEY).catch(() => undefined);
-}

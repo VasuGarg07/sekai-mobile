@@ -2,7 +2,7 @@ import type { WatchStatus } from "@/types/watchlist";
 
 import { ACCENTS, contrastText, luminance, mix, NEUTRALS, withAlpha, type AccentKey } from "./palette";
 
-export type ColorScheme = "light" | "dark";
+type ColorScheme = "light" | "dark";
 
 export interface ThemeColors {
   background: string;
@@ -34,7 +34,7 @@ export interface ThemeColors {
   shadow: string;
 }
 
-export interface GlassStyle {
+interface GlassStyle {
   fill: string;
   /** For glass over busy artwork, where a light fill alone isn't legible. */
   fillStrong: string;

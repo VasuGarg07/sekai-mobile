@@ -2,7 +2,7 @@ import DeviceInfo from "react-native-device-info";
 
 const GITHUB_REPO = "VasuGarg07/sekai-mobile";
 
-export interface AppUpdate {
+interface AppUpdate {
   version: string;
   url: string;
 }

@@ -56,7 +56,7 @@ export interface AniListMedia {
   nextAiringEpisode?: { episode: number; airingAt: number } | null;
 }
 
-export interface AniListPageInfo {
+interface AniListPageInfo {
   total: number;
   currentPage: number;
   hasNextPage: boolean;
