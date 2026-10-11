@@ -3,7 +3,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useDeferredValue,
   useEffect,
   useMemo,
   useState,
@@ -71,11 +70,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const accent = appearance?.accent ?? DEFAULT_APPEARANCE.accent;
   const scheme = mode === "system" ? (systemScheme === "light" ? "light" : "dark") : mode;
 
-  const nextTheme = useMemo(() => createTheme(scheme, accent), [scheme, accent]);
-  // Restyling the whole app is a big render. Deferring it lets the tap land at once (the segment
-  // highlight updates from `appearanceValue`) and lets a second tap interrupt the render instead
-  // of queueing behind it.
-  const theme = useDeferredValue(nextTheme);
+  const theme = useMemo(() => createTheme(scheme, accent), [scheme, accent]);
   const appearanceValue = useMemo<AppearanceContextValue>(
     () => ({
       mode,
