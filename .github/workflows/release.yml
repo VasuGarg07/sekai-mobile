@@ -1,6 +1,5 @@
 # Builds the signed release APK on GitHub's machines and attaches it to a GitHub Release.
-# Trigger: push a tag like v1.0.0. Pushes to the migration branch and manual runs ("Run workflow") build a test APK
-# as an artifact; nothing is published.
+# Trigger: push a tag like v1.0.0. Run it by hand ("Run workflow") to get a test APK as an artifact; nothing is published.
 # Needs these repository secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
 # ANDROID_KEY_PASSWORD, ENV_FILE (the contents of the .env file); and the repository variable VERSION_CODE_BASE.
 name: Release APK
@@ -9,9 +8,6 @@ on:
   push:
     tags:
       - "v*"
-    # Temporary: lets the first dry run happen before this file is on the default branch. Remove after merging.
-    branches:
-      - bare-rn-migration
   workflow_dispatch:
     inputs:
       version:

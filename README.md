@@ -1,56 +1,62 @@
-# Welcome to your Expo app 👋
+# Sekai Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Android app for Sekai Arcadia (anime discovery + watchlist). Bare React Native 0.86 (new architecture),
+React Navigation, TypeScript, Firebase JS SDK, TanStack Query. It shares one Firebase project with
+`../sekai-web`.
 
-## Get started
+## Requirements
 
-1. Install dependencies
+- Node 24.13.0, JDK 17, Android SDK (`ANDROID_HOME` set), a USB-debugging phone or an emulator.
 
-   ```bash
-   npm install
-   ```
+## Setup
 
-2. Start the app
+1. `npm install`
+2. Copy `.env.example` to `.env` and fill in the six Firebase web-app values.
+3. `android/app/google-services.json` must be the Firebase config for `com.vasugarg.sekai`.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run
 
 ```bash
-npm run reset-project
+npm start            # Metro
+npm run android      # build, install and launch the debug app
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+After changing Babel, Metro or `.env`: `npm start -- --reset-cache` (and rebuild for `.env` changes).
+In a debug build, local images are fetched from Metro, so keep it running while you use the app.
 
-### Other setup steps
+## Checks
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npm run typecheck
+npm run lint
+```
 
-## Learn more
+## Release
 
-To learn more about developing your project with Expo, look at the following resources:
+Push a tag like `v1.2.0`. GitHub Actions (`.github/workflows/release.yml`) builds a signed APK and attaches it
+to a GitHub Release. The workflow needs the secrets and variable listed at the top of that file. The tag becomes
+the app's `versionName`, and `versionCode` is `VERSION_CODE_BASE` plus the run number. The in-app update banner
+compares the tag with the latest release.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+The release key is never stored in the repo. Keep the keystore and its passwords outside it.
 
-## Join the community
+### Local signed build
 
-Join our community of developers creating universal apps.
+From `android/`, set the signing variables in the same shell, then build. Use the next free `versionCode`
+(higher than any build users already have):
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```cmd
+set SEKAI_UPLOAD_STORE_FILE=<absolute path to the .jks>
+set SEKAI_UPLOAD_KEY_ALIAS=<key alias>
+set /p SEKAI_UPLOAD_STORE_PASSWORD=Store password:
+set /p SEKAI_UPLOAD_KEY_PASSWORD=Key password:
+gradlew assembleRelease -PappVersionName=1.0.0 -PappVersionCode=<n> -PreactNativeArchitectures=arm64-v8a
+```
+
+The APK is `android/app/build/outputs/apk/release/app-release.apk`. Check which key signed it with
+`apksigner verify --print-certs <apk>` from the Android SDK `build-tools` folder. `keytool -printcert -jarfile` does not
+work here: with `minSdk` 24 the APK has no v1 signature.
+
+## Project layout
+
+See `CLAUDE.md`.
