@@ -110,7 +110,7 @@ function detailQueryOptions(id: number) {
 
 /** Starts loading a detail page on touch-down, which is ~100ms before the tap completes. */
 export function prefetchAnimeDetail(id: number) {
-  void queryClient.prefetchQuery(detailQueryOptions(id));
+  queryClient.prefetchQuery(detailQueryOptions(id));
 }
 
 export function useAnimeDetail(id: number) {

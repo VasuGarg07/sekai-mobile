@@ -91,13 +91,13 @@ export function startQueryCachePersistence(client: QueryClient): () => void {
   const unsubscribeCache = client.getQueryCache().subscribe((event) => {
     if (event.type !== "updated" || event.action.type !== "success") return;
     clearTimeout(timer);
-    timer = setTimeout(() => void save(client), SAVE_DELAY_MS);
+    timer = setTimeout(() => save(client), SAVE_DELAY_MS);
   });
 
   const appState = AppState.addEventListener("change", (status) => {
     if (status === "active") return;
     clearTimeout(timer);
-    void save(client);
+    save(client);
   });
 
   return () => {

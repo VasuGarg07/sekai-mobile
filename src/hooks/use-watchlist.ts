@@ -132,7 +132,7 @@ function useWatchlistMutation<TVariables>({ write, apply }: OptimisticWrite<TVar
     onSuccess: (result, _variables, context) => {
       if (result.success) return;
       for (const [key, data] of context?.snapshot ?? []) client.setQueryData(key, data);
-      if (uid) void client.invalidateQueries({ queryKey: queryKeys.watchlist(uid) });
+      if (uid) client.invalidateQueries({ queryKey: queryKeys.watchlist(uid) });
     },
     onError: (_error, _variables, context) => {
       for (const [key, data] of context?.snapshot ?? []) client.setQueryData(key, data);
