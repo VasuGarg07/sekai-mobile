@@ -1,10 +1,10 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Badge } from "@/components/ui/badge";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { prefetchAnimeDetail } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
 import { useTheme } from "@/providers/theme-provider";
 import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -26,16 +26,14 @@ export function PosterCard({ anime, width }: PosterCardProps) {
       accessibilityRole="button"
       accessibilityLabel={title}
       onPressIn={() => prefetchAnimeDetail(anime.id)}
-      onPress={() => router.push(`/anime/${anime.id}`)}
+      onPress={() => router.openAnime(anime.id)}
       style={({ pressed }) => [styles.card, width !== undefined && { width }, pressed && styles.pressed]}
     >
       <View>
-        <Image
-          source={anime.coverImage}
-          recyclingKey={String(anime.id)}
+        <RemoteImage
+          uri={anime.coverImage}
           style={styles.poster}
-          contentFit="cover"
-          transition={150}
+          fadeMs={150}
         />
         {anime.averageScore !== null && (
           <View style={styles.badge}>

@@ -1,9 +1,9 @@
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 import Animated, { interpolate, useAnimatedStyle, type SharedValue } from "react-native-reanimated";
 
 import { AppText } from "@/components/ui/app-text";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { useTheme } from "@/providers/theme-provider";
 import { POSTER_ASPECT_RATIO, radius, spacing, withAlpha } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -35,11 +35,10 @@ export function DetailHero({ anime, scrollY }: DetailHeroProps) {
   return (
     <View>
       <Animated.View style={[styles.banner, bannerStyle]}>
-        <Image
-          source={anime.bannerImage ?? anime.coverImageExtraLarge}
+        <RemoteImage
+          uri={anime.bannerImage ?? anime.coverImageExtraLarge}
           style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          transition={250}
+          fadeMs={250}
         />
         <LinearGradient
           colors={["rgba(0, 0, 0, 0.5)", colors.scrimTransparent, withAlpha(colors.background, 0.7), colors.background]}
@@ -49,11 +48,10 @@ export function DetailHero({ anime, scrollY }: DetailHeroProps) {
       </Animated.View>
 
       <View style={styles.identity}>
-        <Image
-          source={anime.coverImageExtraLarge ?? anime.coverImage}
+        <RemoteImage
+          uri={anime.coverImageExtraLarge ?? anime.coverImage}
           style={styles.cover}
-          contentFit="cover"
-          transition={250}
+          fadeMs={250}
         />
         <View style={styles.titles}>
           <AppText variant="display" style={styles.title}>

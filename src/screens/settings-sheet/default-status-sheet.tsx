@@ -1,8 +1,8 @@
-import { router } from "expo-router";
 
 import { SheetHeader } from "@/components/ui/sheet-header";
 import { WatchStatusPicker } from "@/components/watch-status-picker";
 import { usePreferences, useUpdatePreferences } from "@/hooks/use-preferences";
+import { router } from "@/navigation/router";
 import type { WatchStatus } from "@/types/watchlist";
 import { confirmTap, showMessage } from "@/utils/feedback";
 

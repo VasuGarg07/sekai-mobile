@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 
 import { GenreIcon } from "@/components/icons/genre-icon";
@@ -8,6 +7,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGenres } from "@/hooks/use-anime";
 import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
+import { router } from "@/navigation/router";
 import { useTheme } from "@/providers/theme-provider";
 import { contrastText, iconSize, radius, spacing, withAlpha } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -57,7 +57,7 @@ function GenreTile({ genre, index }: GenreTileProps) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Browse ${genre}`}
-        onPress={() => router.push(`/genre/${encodeURIComponent(genre)}`)}
+        onPress={() => router.openGenre(genre)}
         style={({ pressed }) => [
           styles.tile,
           { backgroundColor: withAlpha(color, 0.16), borderColor: withAlpha(color, 0.35) },

@@ -1,8 +1,8 @@
-import { router } from "expo-router";
 
 import { AnimeShelf, type ShelfVariant } from "@/components/anime/anime-shelf";
 import { RANKED_LISTS, type RankedListKind } from "@/constants";
 import { useAnimeList } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
 
 const SHELF_SIZES: Record<ShelfVariant, number> = {
   ranked: 10,
@@ -33,7 +33,7 @@ export function RankedShelf({ kind, variant = "poster" }: RankedShelfProps) {
       loading={isPending}
       error={isError}
       onRetry={() => refetch()}
-      onSeeAll={() => router.push(`/list/${kind}`)}
+      onSeeAll={() => router.openRankedList(kind)}
     />
   );
 }

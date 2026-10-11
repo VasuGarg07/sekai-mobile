@@ -1,14 +1,15 @@
-import { Image } from "expo-image";
-import { Redirect, router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, ScrollView, View } from "react-native";
+import { Image, KeyboardAvoidingView, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { GoogleLogo } from "@/components/icons/google-logo";
 import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { IconButton } from "@/components/ui/icon-button";
 import { useAction } from "@/hooks/use-action";
+import { Redirect } from "@/navigation/redirect";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { signInWithGoogle } from "@/services/auth";
@@ -30,7 +31,6 @@ const COPY: Record<LoginMode, { title: string; subtitle: string }> = {
 const LOGO_SIZE = 56;
 const logoForDark = require("@/assets/images/logo-white.png");
 const logoForLight = require("@/assets/images/logo-black.png");
-const googleLogo = require("@/assets/images/google.svg");
 
 export function LoginScreen() {
   const { dark } = useTheme();
@@ -42,7 +42,7 @@ export function LoginScreen() {
   const [email, setEmail] = useState("");
   const google = useAction();
 
-  if (signedInOnOpen) return <Redirect href="/" />;
+  if (signedInOnOpen) return <Redirect to="home" />;
 
   const handleClose = () => router.back();
 
@@ -56,7 +56,7 @@ export function LoginScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.topRow}>
-            <Image source={dark ? logoForDark : logoForLight} style={styles.logo} contentFit="contain" />
+            <Image source={dark ? logoForDark : logoForLight} style={styles.logo} resizeMode="contain" />
             <IconButton icon="close" variant="tonal" accessibilityLabel="Close" onPress={handleClose} />
           </View>
 
@@ -70,7 +70,7 @@ export function LoginScreen() {
               <Button
                 fullWidth
                 variant="outline"
-                leading={<Image source={googleLogo} style={styles.googleLogo} contentFit="contain" />}
+                leading={<GoogleLogo size={iconSize.md} />}
                 title="Continue with Google"
                 loading={google.pending}
                 onPress={handleGoogle}
@@ -120,10 +120,6 @@ const useStyles = createStyles(({ colors }) => ({
   logo: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
-  },
-  googleLogo: {
-    width: iconSize.md,
-    height: iconSize.md,
   },
   heading: {
     gap: spacing.xs,

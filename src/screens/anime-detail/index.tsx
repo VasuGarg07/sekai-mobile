@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Linking, RefreshControl, Share, View } from "react-native";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,6 +12,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { useAnimeDetail } from "@/hooks/use-anime";
 import { useAdultMode } from "@/hooks/use-preferences";
 import { useRefresh } from "@/hooks/use-refresh";
+import { router } from "@/navigation/router";
 import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -139,7 +139,7 @@ function DetailContent({ anime, adultMode, refetch }: DetailContentProps) {
                   <Chip
                     key={genre}
                     label={genre}
-                    onPress={() => router.push(`/genre/${encodeURIComponent(genre)}`)}
+                    onPress={() => router.openGenre(genre)}
                   />
                 ))}
               </View>

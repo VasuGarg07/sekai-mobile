@@ -1,8 +1,8 @@
-import { Image } from "expo-image";
 import { useState } from "react";
 import { View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { radius } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 
@@ -27,8 +27,8 @@ export function Avatar({ name, photoURL, size = 40 }: AvatarProps) {
 
   if (photoURL && !failed) {
     return (
-      <Image
-        source={photoURL}
+      <RemoteImage
+        uri={photoURL}
         style={[styles.avatar, dimensions]}
         onError={() => setFailed(true)}
         accessibilityLabel={name}

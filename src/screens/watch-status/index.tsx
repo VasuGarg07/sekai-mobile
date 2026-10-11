@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,6 +9,7 @@ import {
   useUpdateWatchStatus,
   useWatchStatus,
 } from "@/hooks/use-watchlist";
+import { router } from "@/navigation/router";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { WatchStatus } from "@/types/watchlist";

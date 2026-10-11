@@ -1,9 +1,9 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { SectionHeader } from "@/components/ui/section-header";
+import { router } from "@/navigation/router";
 import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { AnimeRelation } from "@/types/anime";
@@ -27,10 +27,10 @@ export function RelationShelf({ relations }: RelationShelfProps) {
             key={`${relation.relationType}-${relation.id}`}
             accessibilityRole="button"
             accessibilityLabel={`${formatEnum(relation.relationType)}: ${getTitle(relation)}`}
-            onPress={() => router.push(`/anime/${relation.id}`)}
+            onPress={() => router.openAnime(relation.id)}
             style={({ pressed }) => [styles.card, pressed && styles.pressed]}
           >
-            <Image source={relation.coverImage} style={styles.cover} contentFit="cover" transition={200} />
+            <RemoteImage uri={relation.coverImage} style={styles.cover} fadeMs={200} />
             <AppText variant="overline" tone="accent" numberOfLines={1}>
               {formatEnum(relation.relationType)}
             </AppText>

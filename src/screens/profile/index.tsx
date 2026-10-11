@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Linking, ScrollView, View } from "react-native";
 
 import { ListGroup, ListItem } from "@/components/ui/list-item";
@@ -7,6 +6,8 @@ import { UpdateBanner } from "@/components/update-banner";
 import { WEB_APP_URL } from "@/constants";
 import { usePreferences, useUpdatePreferences } from "@/hooks/use-preferences";
 import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
+import { router } from "@/navigation/router";
+import type { SettingsSheetName } from "@/navigation/types";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { currentVersion } from "@/services/app-update";
@@ -19,8 +20,6 @@ import { getSignInMethodsLabel, hasPassword } from "@/utils/user";
 
 import { AppearanceCard } from "./components/appearance-card";
 import { ProfileCard } from "./components/profile-card";
-
-type SettingsSheet = "default-status" | "export" | "set-password" | "sign-out" | "verify-email";
 
 export function ProfileScreen() {
   const { tints } = useTheme();
@@ -71,8 +70,7 @@ function SignedInSettings({ user }: SignedInSettingsProps) {
     if (!result.success && result.message) showMessage(result.message);
   };
 
-  const openSheet = (sheet: SettingsSheet) =>
-    router.push({ pathname: "/settings/[sheet]", params: { sheet } });
+  const openSheet = (sheet: SettingsSheetName) => router.openSettingsSheet(sheet);
 
   return (
     <>

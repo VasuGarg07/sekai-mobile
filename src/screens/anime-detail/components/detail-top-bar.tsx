@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import Animated, { interpolate, useAnimatedStyle, type SharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "@/components/ui/app-text";
 import { GlassView } from "@/components/ui/glass";
 import { IconButton } from "@/components/ui/icon-button";
+import { router } from "@/navigation/router";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 

@@ -1,5 +1,4 @@
 import { FlashList } from "@shopify/flash-list";
-import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, View } from "react-native";
 
@@ -12,6 +11,7 @@ import { ErrorState, MessageState } from "@/components/ui/screen-state";
 import { useRefresh } from "@/hooks/use-refresh";
 import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useWatchlist } from "@/hooks/use-watchlist";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
@@ -51,7 +51,7 @@ export function WatchlistScreen() {
           message="Sign in to save anime and pick up where you left off, here or on the web."
           actionTitle="Sign in"
           actionIcon="login"
-          onAction={() => router.push("/login")}
+          onAction={() => router.openLogin()}
         />
       )}
     </View>
@@ -191,7 +191,7 @@ function EmptyList({ filtered }: EmptyListProps) {
       message="Find something to watch and tap “Add to My List”."
       actionTitle="Explore anime"
       actionIcon="explore"
-      onAction={() => router.navigate("/explore")}
+      onAction={() => router.showTab("Explore")}
     />
   );
 }

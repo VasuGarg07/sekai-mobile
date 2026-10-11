@@ -1,4 +1,4 @@
-import Constants from "expo-constants";
+import DeviceInfo from "react-native-device-info";
 
 const GITHUB_REPO = "VasuGarg07/sekai-mobile";
 
@@ -14,7 +14,7 @@ interface GitHubRelease {
   prerelease: boolean;
 }
 
-export const currentVersion = Constants.expoConfig?.version ?? "0.0.0";
+export const currentVersion = DeviceInfo.getVersion();
 
 function parseVersion(version: string): number[] {
   return version

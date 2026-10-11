@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAddToWatchlist, useWatchStatus } from "@/hooks/use-watchlist";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing } from "@/theme";
@@ -27,7 +27,7 @@ export function WatchlistButton({ anime }: WatchlistButtonProps) {
 
   if (!user) {
     return (
-      <Button fullWidth icon="login" title="Sign in to save" variant="tonal" onPress={() => router.push("/login")} />
+      <Button fullWidth icon="login" title="Sign in to save" variant="tonal" onPress={() => router.openLogin()} />
     );
   }
 
@@ -60,7 +60,7 @@ export function WatchlistButton({ anime }: WatchlistButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={`In your list as ${WATCH_STATUS_LABELS[watchStatus]}. Change status`}
       onPress={() =>
-        router.push({ pathname: "/watch-status", params: { animeId: anime.id, title: getTitle(anime) } })
+        router.openWatchStatus(anime.id, getTitle(anime))
       }
       style={({ pressed }) => [styles.saved, pressed && styles.pressed]}
     >
