@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useIsFocused } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
@@ -38,6 +38,7 @@ export function SpotlightCarousel() {
   const scrollX = useSharedValue(0);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const focused = useIsFocused();
   const count = data?.length ?? 0;
 
   const onScroll = useAnimatedScrollHandler((event) => {
@@ -53,10 +54,10 @@ export function SpotlightCarousel() {
   );
 
   useEffect(() => {
-    if (paused || count < 2) return;
+    if (paused || !focused || count < 2) return;
     const timer = setTimeout(() => goTo((index + 1) % count), AUTO_ADVANCE_MS);
     return () => clearTimeout(timer);
-  }, [index, count, paused, goTo]);
+  }, [index, count, paused, focused, goTo]);
 
   if (isPending || isError || count === 0) {
     return (
