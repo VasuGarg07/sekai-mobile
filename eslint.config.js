@@ -1,10 +1,9 @@
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
-const expoConfig = require("eslint-config-expo/flat");
+const reactNativeConfig = require("@react-native/eslint-config/flat");
 
-module.exports = defineConfig([
-  expoConfig,
+module.exports = [
+  ...reactNativeConfig,
   {
-    ignores: ["dist/*"],
-  }
-]);
+    // The config's Flow rules for .js files call ESLint APIs that ESLint 9 removed and crash. All app code is TypeScript.
+    ignores: ["**/*.js", "android/**", "node_modules/**"],
+  },
+];
