@@ -1,10 +1,10 @@
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 
 import { AppText } from "@/components/ui/app-text";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { prefetchAnimeDetail } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
 import { BANNER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
@@ -25,15 +25,13 @@ export function WideCard({ anime }: WideCardProps) {
       accessibilityRole="button"
       accessibilityLabel={title}
       onPressIn={() => prefetchAnimeDetail(anime.id)}
-      onPress={() => router.push(`/anime/${anime.id}`)}
+      onPress={() => router.openAnime(anime.id)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <Image
-        source={anime.bannerImage ?? anime.coverImage}
-        recyclingKey={String(anime.id)}
+      <RemoteImage
+        uri={anime.bannerImage ?? anime.coverImage}
         style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        transition={150}
+        fadeMs={150}
       />
       <LinearGradient
         colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.85)"]}

@@ -62,7 +62,7 @@ export function useUpdatePreferences() {
     onSuccess: (result, _updates, context) => {
       if (result.success) return;
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
-      else void queryClient.invalidateQueries({ queryKey });
+      else queryClient.invalidateQueries({ queryKey });
     },
   });
 }

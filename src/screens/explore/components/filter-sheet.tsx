@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SheetHeader } from "@/components/ui/sheet-header";
 import { TextField } from "@/components/ui/text-field";
 import { useGenres } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
 import { useExploreFilters } from "@/providers/explore-filters-provider";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";

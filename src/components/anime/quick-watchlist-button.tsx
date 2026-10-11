@@ -1,7 +1,7 @@
-import { router } from "expo-router";
 
 import { Button } from "@/components/ui/button";
 import { useAddToWatchlist, useWatchStatus } from "@/hooks/use-watchlist";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import type { AnimeListItem } from "@/types/anime";
 import { getTitle, WATCH_STATUS_LABELS } from "@/utils/anime";
@@ -24,7 +24,7 @@ export function QuickWatchlistButton({ anime }: QuickWatchlistButtonProps) {
         icon="bookmark_added"
         title={WATCH_STATUS_LABELS[watchStatus]}
         onPress={() =>
-          router.push({ pathname: "/watch-status", params: { animeId: anime.id, title: getTitle(anime) } })
+          router.openWatchStatus(anime.id, getTitle(anime))
         }
       />
     );
@@ -32,7 +32,7 @@ export function QuickWatchlistButton({ anime }: QuickWatchlistButtonProps) {
 
   const handleAdd = async () => {
     if (!user) {
-      router.push("/login");
+      router.openLogin();
       return;
     }
     const result = await addToWatchlist.mutateAsync(anime);

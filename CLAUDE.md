@@ -1,27 +1,29 @@
 # Sekai Mobile
 
-Android app for Sekai Arcadia (anime discovery + watchlist): Expo SDK 57, Expo Router, TypeScript, Firebase JS SDK, TanStack Query.
+Android app for Sekai Arcadia (anime discovery + watchlist): bare React Native 0.86 (new architecture), React Navigation, TypeScript, Firebase JS SDK, TanStack Query.
 It shares one Firebase project with `../sekai-web`. `../sekai-web/firestore.rules` is the backend contract both apps follow.
 
-Conventions below follow the Google TypeScript Style Guide, the Airbnb React/JSX style guide and the React docs, adapted where Expo's tooling expects otherwise.
+Conventions below follow the Google TypeScript Style Guide, the Airbnb React/JSX style guide and the React docs, adapted where React Native or React Navigation expects otherwise.
 
 ## Workflow
 
-- After every change run `npx tsc --noEmit` and `npx expo lint`, and fix what they report.
-- Never run installs, prebuild or builds. Give the user the exact command instead:
-  - `npx expo install <package>` (not `npm install`, so versions match the Expo SDK)
-  - `npx expo prebuild --clean --platform android`
-  - `npx expo run:android --device`
+- After every change run `npx tsc --noEmit` and `npm run lint`, and fix what they report.
+- Never run installs or builds. Give the user the exact command instead:
+  - `npm install <package>`; if the package has native code, say that a rebuild is needed
+  - `npm run android` (debug build, install, launch)
+  - `npm start -- --reset-cache` after changing Babel, Metro or `.env`
+  - release build: see "Local signed build" in `README.md`
 - Never commit, push or create branches unless the user explicitly asks in that turn.
-- Don't edit `app.json` or other native config while the user has a build running.
-- `android/` is generated. Never edit it; configure native behaviour through `app.json` and config plugins.
-- Expo APIs change every SDK. Check the docs for the installed version (`https://docs.expo.dev/versions/v57.0.0/`) instead of relying on memory.
+- Don't edit `android/` or other native config while the user has a build running.
+- `android/` is committed source. Edit it only when a task needs native configuration (manifest, Gradle, resources) and say which native file changed so the user knows to rebuild. Never edit build output (`android/app/build/`, `android/.gradle/`).
+- Library APIs change between versions. Check the docs for the installed version: React Navigation 7 (https://reactnavigation.org/docs/getting-started), React Native (https://reactnative.dev/docs/getting-started), and each native library's README in `node_modules`, instead of relying on memory.
 
 ## Structure
 
 ```
 src/
-  app/          routes only (Expo Router); read route params, render a screen
+  app.tsx       root component: providers and the navigator
+  navigation/   navigators, route components (read params, render a screen), typed router, linking
   screens/      screen bodies; a complex screen is a folder with index.tsx + components/
   components/   shared components; ui/ holds generic primitives
   providers/    React context providers
@@ -35,12 +37,13 @@ src/
 ```
 
 - UI never calls Firebase directly; it goes through `services/`.
+- UI never calls React Navigation to navigate; it uses `router` from `@/navigation/router`.
 - Server data goes through TanStack Query. React context is only for app-wide client state (auth).
 - Import project files with the `@/` alias. Group imports: packages, then `@/`, then relative. Use `import type` for type-only imports.
 
 ## TypeScript
 
-- Named exports only. Route files are the only default exports, because Expo Router requires them.
+- Named exports only.
 - `interface` for object shapes, including props. `type` for unions and other aliases.
 - No `any`. Use `unknown` and narrow it with a type guard.
 - No non-null `!` and no `as` casts without a reason that is obvious or stated in a comment.

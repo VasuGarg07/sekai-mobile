@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
 
@@ -7,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { router } from "@/navigation/router";
 import { useExploreFilters } from "@/providers/explore-filters-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing, typography } from "@/theme";
@@ -60,7 +60,7 @@ export function ExploreScreen() {
             variant="tonal"
             active={activeFilterCount > 0}
             accessibilityLabel={activeFilterCount > 0 ? `Filters, ${activeFilterCount} active` : "Filters"}
-            onPress={() => router.navigate("/explore-filters")}
+            onPress={() => router.openExploreFilters()}
           />
           {activeFilterCount > 0 && (
             <View style={styles.badge}>

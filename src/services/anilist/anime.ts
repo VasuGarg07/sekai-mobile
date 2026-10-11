@@ -209,7 +209,7 @@ const BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 700;
 const RATE_LIMIT_WAITS_MS = [5_000, 15_000, 30_000];
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 async function fetchBatch(ids: number[], query: string): Promise<MediaPageResponse> {
   for (let attempt = 0; ; attempt++) {

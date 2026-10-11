@@ -8,7 +8,7 @@ import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing, type ThemeColors } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 
-export type ButtonVariant = "filled" | "tonal" | "outline" | "ghost" | "glass" | "danger";
+type ButtonVariant = "filled" | "tonal" | "outline" | "ghost" | "glass" | "danger";
 type ButtonSize = "md" | "sm";
 
 interface ButtonProps extends Omit<PressableProps, "children" | "style"> {

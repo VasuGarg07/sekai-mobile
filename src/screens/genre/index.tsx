@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +9,7 @@ import { StackHeader } from "@/components/ui/page-header";
 import { MessageState } from "@/components/ui/screen-state";
 import { useAnimeSearch } from "@/hooks/use-anime";
 import { useAdultMode } from "@/hooks/use-preferences";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { isAdultGenre } from "@/services/anilist/anime";
 import { spacing } from "@/theme";
@@ -46,7 +46,7 @@ export function GenreScreen({ genre }: GenreScreenProps) {
           }
           actionTitle={user ? "Open profile" : "Sign in"}
           actionIcon={user ? "settings" : "login"}
-          onAction={() => (user ? router.navigate("/profile") : router.push("/login"))}
+          onAction={() => (user ? router.showTab("Profile") : router.openLogin())}
         />
       ) : (
         <GenreResults genre={genre} />

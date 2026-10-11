@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 
 import { PasswordField } from "@/components/password-field";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { SheetHeader } from "@/components/ui/sheet-header";
 import { useAction } from "@/hooks/use-action";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { setPassword } from "@/services/auth";
 import { confirmTap, showMessage } from "@/utils/feedback";

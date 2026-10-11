@@ -1,10 +1,10 @@
-import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText } from "@/components/ui/app-text";
 import { IconButton } from "@/components/ui/icon-button";
+import { router } from "@/navigation/router";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 

@@ -1,4 +1,4 @@
-import { ActivityIndicator, View, type StyleProp, type ViewStyle } from "react-native";
+import { View, type StyleProp, type ViewStyle } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
@@ -73,16 +73,6 @@ export function ErrorState({ message, onRetry, style }: ErrorStateProps) {
       onAction={onRetry}
       style={style}
     />
-  );
-}
-
-export function LoadingState() {
-  const { colors } = useTheme();
-  const styles = useStyles();
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator color={colors.accent} size="large" />
-    </View>
   );
 }
 

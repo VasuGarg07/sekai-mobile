@@ -3,7 +3,7 @@ import { Text, type TextProps } from "react-native";
 import { useTheme } from "@/providers/theme-provider";
 import { typography, type TextVariant, type ThemeColors } from "@/theme";
 
-export type TextTone =
+type TextTone =
   | "default"
   | "muted"
   | "subtle"

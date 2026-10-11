@@ -1,42 +1,71 @@
-import type { TabTriggerSlotProps } from "expo-router/ui";
-import { useEffect, type ReactNode } from "react";
-import { Pressable, View, type GestureResponderEvent, type ViewProps } from "react-native";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useEffect } from "react";
+import { Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText } from "@/components/ui/app-text";
 import { GlassView } from "@/components/ui/glass";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { isTabName, type TabName } from "@/navigation/types";
 import { useTheme } from "@/providers/theme-provider";
 import { iconSize, radius, spacing, TAB_BAR_HEIGHT } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import { confirmTap } from "@/utils/feedback";
 
-interface GlassTabBarProps extends ViewProps {
-  children: ReactNode;
-}
+const TAB_ITEMS: Record<TabName, { label: string; icon: IconName }> = {
+  Home: { label: "Home", icon: "home" },
+  Explore: { label: "Explore", icon: "explore" },
+  Watchlist: { label: "My List", icon: "bookmarks" },
+  Profile: { label: "Profile", icon: "person" },
+};
 
-export function GlassTabBar({ children, style, ...viewProps }: GlassTabBarProps) {
+export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
   const styles = useStyles();
   const { bottom } = useSafeAreaInsets();
 
   return (
     <View pointerEvents="box-none" style={[styles.wrapper, { bottom: bottom + spacing.sm }]}>
-      <GlassView strong style={[styles.bar, style]} {...viewProps}>
-        {children}
+      <GlassView strong style={styles.bar}>
+        {state.routes.map((route, index) => {
+          if (!isTabName(route.name)) return null;
+          const { label, icon } = TAB_ITEMS[route.name];
+          const isFocused = state.index === index;
+
+          const handlePress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+          };
+
+          return (
+            <TabButton
+              key={route.key}
+              label={label}
+              icon={icon}
+              isFocused={isFocused}
+              onPress={handlePress}
+            />
+          );
+        })}
       </GlassView>
     </View>
   );
 }
 
-interface TabButtonProps extends TabTriggerSlotProps {
+interface TabButtonProps {
   label: string;
   icon: IconName;
+  isFocused: boolean;
+  onPress: () => void;
 }
 
 const SPRING = { damping: 18, stiffness: 220 };
 
-export function TabButton({ label, icon, isFocused = false, onPress, ...props }: TabButtonProps) {
+function TabButton({ label, icon, isFocused, onPress }: TabButtonProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const progress = useSharedValue(isFocused ? 1 : 0);
@@ -50,9 +79,9 @@ export function TabButton({ label, icon, isFocused = false, onPress, ...props }:
     transform: [{ scale: 0.6 + progress.value * 0.4 }],
   }));
 
-  const handlePress = (event: GestureResponderEvent) => {
+  const handlePress = () => {
     if (!isFocused) confirmTap();
-    onPress?.(event);
+    onPress();
   };
 
   return (
@@ -60,7 +89,6 @@ export function TabButton({ label, icon, isFocused = false, onPress, ...props }:
       accessibilityRole="tab"
       accessibilityLabel={label}
       accessibilityState={{ selected: isFocused }}
-      {...props}
       style={styles.tab}
       onPress={handlePress}
     >

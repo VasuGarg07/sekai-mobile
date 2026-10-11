@@ -1,5 +1,5 @@
-import { File, Paths } from "expo-file-system";
-import * as Sharing from "expo-sharing";
+import { CachesDirectoryPath, writeFile } from "@dr.pogodin/react-native-fs";
+import Share from "react-native-share";
 
 import { fetchEntireWatchlist } from "@/services/watchlist";
 import type { ActionResult } from "@/types/result";
@@ -96,13 +96,14 @@ export async function exportWatchlist(uid: string, format: ExportFormat): Promis
       return { success: false, message: "Your watchlist is empty. Nothing to export." };
     }
 
-    const file = new File(Paths.cache, `sekai-watchlist.${format}`);
-    file.create({ overwrite: true });
-    file.write(SERIALIZERS[format](items.map(toRow)));
+    const path = `${CachesDirectoryPath}/sekai-watchlist.${format}`;
+    await writeFile(path, SERIALIZERS[format](items.map(toRow)), "utf8");
 
-    await Sharing.shareAsync(file.uri, {
-      mimeType: MIME_TYPES[format],
-      dialogTitle: "Export watchlist",
+    await Share.open({
+      url: `file://${path}`,
+      type: MIME_TYPES[format],
+      title: "Export watchlist",
+      failOnCancel: false,
     });
     return { success: true };
   } catch (error) {

@@ -60,12 +60,6 @@ export const iconSize = {
   xl: 32,
 } as const;
 
-export const motion = {
-  fast: 150,
-  normal: 250,
-  slow: 400,
-} as const;
-
 /** Poster images are 2:3 (width / height). */
 export const POSTER_ASPECT_RATIO = 2 / 3;
 export const BANNER_ASPECT_RATIO = 16 / 9;

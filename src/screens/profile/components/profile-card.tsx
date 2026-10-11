@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
@@ -6,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { router } from "@/navigation/router";
 import { useTheme } from "@/providers/theme-provider";
 import { radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -34,7 +34,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
             Sign in to keep a list that syncs with the Sekai website.
           </AppText>
         </View>
-        <Button fullWidth icon="login" title="Sign in" onPress={() => router.push("/login")} />
+        <Button fullWidth icon="login" title="Sign in" onPress={() => router.openLogin()} />
       </View>
     );
   }

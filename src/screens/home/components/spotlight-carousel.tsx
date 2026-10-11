@@ -1,8 +1,6 @@
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { router, useIsFocused } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 import Animated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -15,8 +13,11 @@ import { QuickWatchlistButton } from "@/components/anime/quick-watchlist-button"
 import { AppText } from "@/components/ui/app-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSpotlight } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
+import { useIsFocused } from "@/navigation/use-is-focused";
 import { useTheme } from "@/providers/theme-provider";
 import { radius, spacing, withAlpha } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -117,11 +118,10 @@ function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
     <View style={[styles.slide, { width }]}>
       <View style={styles.banner}>
         <Animated.View style={[StyleSheet.absoluteFill, imageStyle]}>
-          <Image
-            source={anime.bannerImage ?? anime.coverImage}
+          <RemoteImage
+            uri={anime.bannerImage ?? anime.coverImage}
             style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            transition={300}
+            fadeMs={300}
           />
         </Animated.View>
         <LinearGradient
@@ -152,7 +152,7 @@ function Slide({ anime, rank, index, width, scrollX }: SlideProps) {
           </AppText>
         )}
         <View style={styles.actions}>
-          <Button icon="info" title="Details" onPress={() => router.push(`/anime/${anime.id}`)} />
+          <Button icon="info" title="Details" onPress={() => router.openAnime(anime.id)} />
           <QuickWatchlistButton anime={anime} />
         </View>
       </View>

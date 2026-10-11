@@ -1,10 +1,10 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { Button } from "@/components/ui/button";
 import { SheetHeader } from "@/components/ui/sheet-header";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { resendVerification } from "@/services/auth";
 import { spacing } from "@/theme";

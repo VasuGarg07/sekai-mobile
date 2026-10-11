@@ -57,7 +57,7 @@ export const NEUTRALS = {
 
 function channels(hex: string): [number, number, number] {
   const value = parseInt(hex.slice(1), 16);
-  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+  return [Math.floor(value / 65536) % 256, Math.floor(value / 256) % 256, value % 256];
 }
 
 export function withAlpha(hex: string, alpha: number): string {

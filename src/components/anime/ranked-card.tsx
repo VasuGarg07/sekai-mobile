@@ -1,9 +1,9 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
+import { RemoteImage } from "@/components/ui/remote-image";
 import { prefetchAnimeDetail } from "@/hooks/use-anime";
+import { router } from "@/navigation/router";
 import { POSTER_ASPECT_RATIO, radius, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
 import type { AnimeListItem } from "@/types/anime";
@@ -27,17 +27,15 @@ export function RankedCard({ anime, rank }: RankedCardProps) {
       accessibilityRole="button"
       accessibilityLabel={`Number ${rank}: ${title}`}
       onPressIn={() => prefetchAnimeDetail(anime.id)}
-      onPress={() => router.push(`/anime/${anime.id}`)}
+      onPress={() => router.openAnime(anime.id)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={styles.artwork}>
         <Text style={styles.rank}>{rank}</Text>
-        <Image
-          source={anime.coverImage}
-          recyclingKey={String(anime.id)}
+        <RemoteImage
+          uri={anime.coverImage}
           style={styles.cover}
-          contentFit="cover"
-          transition={150}
+          fadeMs={150}
         />
       </View>
       <AppText variant="label" numberOfLines={1} style={styles.title}>

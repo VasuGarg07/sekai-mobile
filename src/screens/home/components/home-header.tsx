@@ -1,6 +1,4 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import Animated, { interpolate, useAnimatedStyle, type SharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -8,6 +6,7 @@ import { AppText } from "@/components/ui/app-text";
 import { Avatar } from "@/components/ui/avatar";
 import { GlassView } from "@/components/ui/glass";
 import { IconButton } from "@/components/ui/icon-button";
+import { router } from "@/navigation/router";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { radius, spacing } from "@/theme";
@@ -42,7 +41,7 @@ export function HomeHeader({ scrollY, solidAt }: HomeHeaderProps) {
       </Animated.View>
       <View style={styles.brandSlot}>
         <GlassView style={styles.brand}>
-          <Image source={dark ? logoForDark : logoForLight} style={styles.logo} contentFit="contain" />
+          <Image source={dark ? logoForDark : logoForLight} style={styles.logo} resizeMode="contain" />
           <AppText style={styles.wordmark}>Sekai</AppText>
         </GlassView>
       </View>
@@ -50,13 +49,13 @@ export function HomeHeader({ scrollY, solidAt }: HomeHeaderProps) {
         icon="search"
         variant="glass"
         accessibilityLabel="Search anime"
-        onPress={() => router.navigate("/explore")}
+        onPress={() => router.showTab("Explore")}
       />
       {user ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Your profile"
-          onPress={() => router.navigate("/profile")}
+          onPress={() => router.showTab("Profile")}
           hitSlop={4}
         >
           <Avatar name={getDisplayName(user)} photoURL={user.photoURL} size={40} />
@@ -66,7 +65,7 @@ export function HomeHeader({ scrollY, solidAt }: HomeHeaderProps) {
           icon="login"
           variant="glass"
           accessibilityLabel="Sign in"
-          onPress={() => router.push("/login")}
+          onPress={() => router.openLogin()}
         />
       )}
     </View>

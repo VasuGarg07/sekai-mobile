@@ -13,7 +13,7 @@ export function useSessionPrefetch() {
 
   useEffect(() => {
     if (!uid) return;
-    void queryClient.prefetchQuery(preferencesQueryOptions(uid));
-    void queryClient.prefetchQuery(watchlistIdsQueryOptions(uid));
+    queryClient.prefetchQuery(preferencesQueryOptions(uid));
+    queryClient.prefetchQuery(watchlistIdsQueryOptions(uid));
   }, [uid, queryClient]);
 }
