@@ -1,14 +1,17 @@
-import { FlashList } from "@shopify/flash-list";
-import { useMemo, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, View } from "react-native";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+import { useMemo, useRef, useState, type ReactElement } from "react";
+import { ActivityIndicator, RefreshControl, ScrollView, View, type RefreshControlProps } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AnimeGridPlaceholder } from "@/components/anime/anime-grid";
 import { AppText } from "@/components/ui/app-text";
 import { Chip } from "@/components/ui/chip";
 import { IconButton } from "@/components/ui/icon-button";
 import { PageHeader } from "@/components/ui/page-header";
+import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
 import { ErrorState, MessageState } from "@/components/ui/screen-state";
 import { useRefresh } from "@/hooks/use-refresh";
+import { useScrollToTopVisibility } from "@/hooks/use-scroll-to-top-visibility";
 import { useTabBarSpace } from "@/hooks/use-tab-bar-space";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { router } from "@/navigation/router";
@@ -16,7 +19,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
-import { WATCH_STATUSES, type WatchStatus } from "@/types/watchlist";
+import { WATCH_STATUSES, type WatchlistItem, type WatchStatus } from "@/types/watchlist";
 import { WATCH_STATUS_ICONS, WATCH_STATUS_LABELS } from "@/utils/anime";
 
 import { WatchlistGridCard, WatchlistRow } from "./components/watchlist-row";
@@ -155,24 +158,67 @@ function WatchlistContent({ viewMode }: WatchlistContentProps) {
           Couldn&apos;t reach AniList, so some details may be out of date.
         </AppText>
       )}
-      <FlashList
+      <WatchlistList
         key={viewMode}
-        data={visibleItems}
+        items={visibleItems}
+        isGrid={isGrid}
+        refreshControl={refreshControl}
+        loadingMore={isFetchingNextPage}
+        onEndReached={handleEndReached}
+        bottomSpace={bottomSpace}
+      />
+    </>
+  );
+}
+
+interface WatchlistListProps {
+  items: WatchlistItem[];
+  isGrid: boolean;
+  refreshControl: ReactElement<RefreshControlProps>;
+  loadingMore: boolean;
+  onEndReached: () => void;
+  bottomSpace: number;
+}
+
+// Keyed by view mode in the parent, so switching list and grid starts with the scroll-to-top button hidden.
+function WatchlistList({
+  items,
+  isGrid,
+  refreshControl,
+  loadingMore,
+  onEndReached,
+  bottomSpace,
+}: WatchlistListProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const { bottom } = useSafeAreaInsets();
+  const listRef = useRef<FlashListRef<WatchlistItem>>(null);
+  const { visible, scrollProps } = useScrollToTopVisibility();
+
+  return (
+    <View style={styles.fill}>
+      <FlashList
+        ref={listRef}
+        {...scrollProps}
+        data={items}
         numColumns={isGrid ? 3 : 1}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (isGrid ? <WatchlistGridCard item={item} /> : <WatchlistRow item={item} />)}
-        onEndReached={handleEndReached}
+        onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={refreshControl}
-        ListFooterComponent={
-          isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null
-        }
+        ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
         contentContainerStyle={{
           ...(isGrid ? styles.gridContent : undefined),
           paddingBottom: bottomSpace,
         }}
       />
-    </>
+      <ScrollToTopButton
+        visible={visible}
+        bottomOffset={Math.max(bottomSpace, bottom + spacing.lg)}
+        onPress={() => listRef.current?.scrollToTop({ animated: true })}
+      />
+    </View>
   );
 }
 
@@ -200,6 +246,9 @@ const useStyles = createStyles(({ colors }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  fill: {
+    flex: 1,
   },
   filterBar: {
     flexGrow: 0,

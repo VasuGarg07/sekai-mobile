@@ -1,9 +1,12 @@
-import { FlashList } from "@shopify/flash-list";
-import type { ReactElement } from "react";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+import { useRef, type ReactElement } from "react";
 import { ActivityIndicator, RefreshControl, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PosterCard } from "@/components/anime/poster-card";
+import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useScrollToTopVisibility } from "@/hooks/use-scroll-to-top-visibility";
 import { useTheme } from "@/providers/theme-provider";
 import { POSTER_ASPECT_RATIO, spacing } from "@/theme";
 import { createStyles } from "@/theme/create-styles";
@@ -41,34 +44,46 @@ export function AnimeGrid({
 }: AnimeGridProps) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const { bottom } = useSafeAreaInsets();
+  const listRef = useRef<FlashListRef<AnimeListItem>>(null);
+  const { visible, scrollProps } = useScrollToTopVisibility();
 
   return (
-    <FlashList
-      data={items}
-      numColumns={COLUMNS}
-      keyExtractor={keyExtractor}
-      renderItem={({ item }) => (
-        <View style={styles.cell}>
-          <PosterCard anime={item} />
-        </View>
-      )}
-      drawDistance={DRAW_DISTANCE}
-      onEndReached={onEndReached}
-      onEndReachedThreshold={END_REACHED_THRESHOLD}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[colors.accent]}
-          progressBackgroundColor={colors.surfaceRaised}
-        />
-      }
-      ListHeaderComponent={header}
-      ListEmptyComponent={empty}
-      ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
-      contentContainerStyle={{ ...styles.content, paddingBottom: bottomInset }}
-      keyboardShouldPersistTaps="handled"
-    />
+    <View style={styles.fill}>
+      <FlashList
+        ref={listRef}
+        {...scrollProps}
+        data={items}
+        numColumns={COLUMNS}
+        keyExtractor={keyExtractor}
+        renderItem={({ item }) => (
+          <View style={styles.cell}>
+            <PosterCard anime={item} />
+          </View>
+        )}
+        drawDistance={DRAW_DISTANCE}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={END_REACHED_THRESHOLD}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.accent]}
+            progressBackgroundColor={colors.surfaceRaised}
+          />
+        }
+        ListHeaderComponent={header}
+        ListEmptyComponent={empty}
+        ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
+        contentContainerStyle={{ ...styles.content, paddingBottom: bottomInset }}
+        keyboardShouldPersistTaps="handled"
+      />
+      <ScrollToTopButton
+        visible={visible}
+        bottomOffset={Math.max(bottomInset, bottom + spacing.lg)}
+        onPress={() => listRef.current?.scrollToTop({ animated: true })}
+      />
+    </View>
   );
 }
 
@@ -87,6 +102,9 @@ export function AnimeGridPlaceholder() {
 }
 
 const useStyles = createStyles(() => ({
+  fill: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: spacing.md,
   },
